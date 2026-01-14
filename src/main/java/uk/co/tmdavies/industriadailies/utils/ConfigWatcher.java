@@ -1,6 +1,6 @@
-package uk.co.tmdavies.motdoftheday.utils;
+package uk.co.tmdavies.industriadailies.utils;
 
-import uk.co.tmdavies.motdoftheday.MOTDoftheDay;
+import uk.co.tmdavies.industriadailies.IndustriaDailies;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -17,7 +17,7 @@ public class ConfigWatcher {
     }
 
     public void watchFile() {
-        MOTDoftheDay.LOGGER.info("Starting file watcher");
+        IndustriaDailies.LOGGER.info("Starting file watcher");
 
         Path watcherPath = Paths.get(path);
         WatchService watchService;
@@ -27,7 +27,7 @@ public class ConfigWatcher {
 
             watcherPath.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
         } catch (IOException exception) {
-            MOTDoftheDay.LOGGER.error("Failed to create or register watch service.");
+            IndustriaDailies.LOGGER.error("Failed to create or register watch service.");
             exception.printStackTrace();
 
             return;
@@ -60,11 +60,11 @@ public class ConfigWatcher {
                         });
 
                 if (!key.reset()) {
-                    MOTDoftheDay.LOGGER.warn("Watch key no longer valid. Exiting watcher thread.");
+                    IndustriaDailies.LOGGER.warn("Watch key no longer valid. Exiting watcher thread.");
                     break;
                 }
             } catch (InterruptedException exception) {
-                MOTDoftheDay.LOGGER.error("File watcher thread interrupted.");
+                IndustriaDailies.LOGGER.error("File watcher thread interrupted.");
                 exception.printStackTrace();
                 Thread.currentThread().interrupt();
                 break;
@@ -81,8 +81,8 @@ public class ConfigWatcher {
 
         lastModified = now;
 
-        MOTDoftheDay.LOGGER.info("Config File Modified");
-        MOTDoftheDay.configFile.loadConfig();
+        IndustriaDailies.LOGGER.info("Config File Modified");
+        IndustriaDailies.configFile.loadConfig();
     }
 
 }
