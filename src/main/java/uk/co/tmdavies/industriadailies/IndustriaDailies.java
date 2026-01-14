@@ -11,6 +11,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import uk.co.tmdavies.industriadailies.objects.Manager;
 import uk.co.tmdavies.industriadailies.utils.ConfigFile;
 
 @Mod(IndustriaDailies.MODID)
@@ -20,6 +21,7 @@ public class IndustriaDailies {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static ConfigFile configFile;
+    public static Manager manager;
 
     public IndustriaDailies(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
@@ -34,7 +36,13 @@ public class IndustriaDailies {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("HELLO from server starting");
+
         configFile = new ConfigFile("config");
         configFile.loadConfig();
+
+        manager = new Manager();
+        manager.loadQuests();
+
+        manager.verboseManager();
     }
 }

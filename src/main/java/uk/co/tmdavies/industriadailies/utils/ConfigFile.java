@@ -67,7 +67,7 @@ public class ConfigFile {
             IndustriaDailies.LOGGER.error("Error loading config file. Continuing to create new...");
         }
 
-        verboseConfig();
+        //verboseConfig();
     }
 
     public void setDefaults() {
@@ -129,14 +129,14 @@ public class ConfigFile {
         return jsonObj;
     }
 
-    public Object get(String path) {
+    public JsonObject get(String path) {
         if (jsonObj == null) {
             IndustriaDailies.LOGGER.error("Config was not loaded before grabbing data.");
 
             return null;
         }
 
-        return jsonObj.get(path);
+        return jsonObj.getAsJsonObject(path);
     }
 
     public boolean isModEnabled() {
