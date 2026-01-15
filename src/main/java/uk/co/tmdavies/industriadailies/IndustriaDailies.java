@@ -42,7 +42,6 @@ public class IndustriaDailies {
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Loading...");
 
-
         // Quests Config
         configFile = new ConfigFile("config");
         configFile.loadConfig();
@@ -51,7 +50,7 @@ public class IndustriaDailies {
         irsFile = new ConfigFile("neonetworkirs");
         irsFile.loadConfig();
 
-        neoNetworkIRS = new NeoNetworkIRS(irsFile.get("apikey").getAsString());
+        neoNetworkIRS = new NeoNetworkIRS(irsFile.getElement("apikey").getAsString());
 
         manager = new Manager();
         manager.loadQuests();

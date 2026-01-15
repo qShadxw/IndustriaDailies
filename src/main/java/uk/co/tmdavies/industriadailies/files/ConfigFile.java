@@ -1,9 +1,6 @@
 package uk.co.tmdavies.industriadailies.files;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import org.apache.commons.io.IOUtils;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
 
@@ -81,7 +78,7 @@ public class ConfigFile {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         JsonObject irsObject = new JsonObject();
-        irsObject.addProperty("apikey", "01189998819901197253");
+        irsObject.addProperty("apikey", "01189998819991197253");
 
         try (FileWriter writer = new FileWriter(this.path + "/" + this.fileName)) {
             gson.toJson(irsObject, writer);
@@ -182,6 +179,16 @@ public class ConfigFile {
         }
 
         return jsonObj.getAsJsonObject(path);
+    }
+
+    public JsonElement getElement(String path) {
+        if (jsonObj == null) {
+            IndustriaDailies.LOGGER.error("Config was not loaded before grabbing data.");
+
+            return null;
+        }
+
+        return jsonObj.get(path);
     }
 
     public boolean isModEnabled() {

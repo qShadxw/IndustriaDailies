@@ -291,6 +291,16 @@ public class Manager {
         return true;
     }
 
+    public void setQuestAsCompleted(Player player, String questId) {
+        Quest quest = getPersonalQuestFromId(player, questId);
+
+        playerQuests.get(player.getStringUUID()).remove(quest);
+
+        quest.setCompleted(true);
+
+        playerQuests.get(player.getStringUUID()).add(quest);
+    }
+
     public boolean hasQuests(Player player) {
         return playerQuests.containsKey(player.getStringUUID());
     }

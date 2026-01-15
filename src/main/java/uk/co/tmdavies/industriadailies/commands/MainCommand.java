@@ -65,6 +65,8 @@ public class MainCommand {
                                 break;
                             }
 
+                            IndustriaDailies.manager.setQuestAsCompleted(target, questId);
+
                             target.getInventory().add(quest.getReward());
                             break;
                         case "delete":
