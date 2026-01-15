@@ -47,7 +47,6 @@ public class NeoNetworkIRS {
                     .POST(HttpRequest.BodyPublishers.ofString(bodyBuilder, StandardCharsets.UTF_8))
                     .build();
 
-            // Send the request and get the response
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             IndustriaDailies.LOGGER.info("Response code: " + response.statusCode());
