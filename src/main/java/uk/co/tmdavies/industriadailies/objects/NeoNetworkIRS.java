@@ -1,7 +1,6 @@
 package uk.co.tmdavies.industriadailies.objects;
 
 import net.minecraft.world.entity.player.Player;
-import okhttp3.*;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
 import uk.co.tmdavies.industriadailies.utils.Utils;
 
