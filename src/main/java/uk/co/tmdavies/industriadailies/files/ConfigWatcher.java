@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.utils;
+package uk.co.tmdavies.industriadailies.files;
 
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
 

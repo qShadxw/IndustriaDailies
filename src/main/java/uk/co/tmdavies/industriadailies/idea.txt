@@ -1,0 +1,4 @@
+Open a chest inventory serverside with title "Daily Quests".
+Set items in certain slots showing the current quests.
+
+Change to another item when finished.

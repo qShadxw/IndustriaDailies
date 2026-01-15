@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.utils;
+package uk.co.tmdavies.industriadailies.files;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -58,7 +58,14 @@ public class ConfigFile {
         this.file = new File(this.path + "/" + this.fileName);
 
         if (file.length() == 0) {
-            setDefaults();
+            switch (this.fileName) {
+                case "config.json":
+                    setDefaultsForConfig();
+                    break;
+                case "neonetworkirs.json":
+                    setDefaultsForNNIRS();
+                    break;
+            }
         }
 
         try (FileInputStream inputStream = new FileInputStream(this.path + "/" + this.fileName)) {
@@ -70,11 +77,31 @@ public class ConfigFile {
         //verboseConfig();
     }
 
-    public void setDefaults() {
+    public void setDefaultsForNNIRS() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        JsonObject irsObject = new JsonObject();
+        irsObject.addProperty("apikey", "01189998819901197253");
+
+        try (FileWriter writer = new FileWriter(this.path + "/" + this.fileName)) {
+            gson.toJson(irsObject, writer);
+        } catch (IOException exception) {
+            IndustriaDailies.LOGGER.error("Failed to write {} file defaults.", this.fileName);
+            exception.printStackTrace();
+        }
+    }
+
+    public void setDefaultsForConfig() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         // Main Object
         JsonObject questsObject = new JsonObject();
+
+        // Default Reward Object
+        JsonObject rewardObject = new JsonObject();
+        rewardObject.addProperty("_comment", "If you want custom money, put 'irs' in ItemId, amount is the amount of money to give.");
+        rewardObject.addProperty("ItemId", "gachamachine:gacha_coin");
+        rewardObject.addProperty("Amount", 1);
 
         // First Template Section Object
         JsonObject templateFirstSection = new JsonObject();
@@ -85,6 +112,7 @@ public class ConfigFile {
         firstQuest.addProperty("Objective", "Get 10 Porkchops");
         firstQuest.addProperty("Item-Needed", "minecraft:porkchop");
         firstQuest.addProperty("Amount-Needed", "10");
+        firstQuest.add("Reward", rewardObject);
         firstQuest.addProperty("Weight", 15);
 
         JsonObject secondQuest = new JsonObject();
@@ -92,6 +120,7 @@ public class ConfigFile {
         secondQuest.addProperty("Objective", "Kill {Random} Player");
         secondQuest.addProperty("Item-Needed", "minecraft:player_head");
         secondQuest.addProperty("Amount-Needed", "1");
+        secondQuest.add("Reward", rewardObject);
         secondQuest.addProperty("Weight", 20);
 
         templateFirstSection.add("Quest1", firstQuest);
@@ -101,8 +130,24 @@ public class ConfigFile {
         JsonObject templateSecondSection = new JsonObject();
         templateSecondSection.addProperty("Weight", 50);
 
-        templateSecondSection.add("Quest1", firstQuest);
-        templateSecondSection.add("Quest2", secondQuest);
+        JsonObject thirdQuest = new JsonObject();
+        thirdQuest.addProperty("Id", "NN_Section_2_Quest_1");
+        thirdQuest.addProperty("Objective", "Get 10 Enderpearls");
+        thirdQuest.addProperty("Item-Needed", "minecraft:ender_pearl");
+        thirdQuest.addProperty("Amount-Needed", "10");
+        thirdQuest.add("Reward", rewardObject);
+        thirdQuest.addProperty("Weight", 15);
+
+        JsonObject forthQuest = new JsonObject();
+        forthQuest.addProperty("Id", "NN_Section_2_Quest_2");
+        forthQuest.addProperty("Objective", "Kill the Wither");
+        forthQuest.addProperty("Item-Needed", "minecraft:nether_star");
+        forthQuest.addProperty("Amount-Needed", "1");
+        forthQuest.add("Reward", rewardObject);
+        forthQuest.addProperty("Weight", 20);
+
+        templateSecondSection.add("Quest1", thirdQuest);
+        templateSecondSection.add("Quest2", forthQuest);
 
         JsonObject sectionObject = new JsonObject();
 
@@ -114,7 +159,7 @@ public class ConfigFile {
         try (FileWriter writer = new FileWriter(this.path + "/" + this.fileName)) {
             gson.toJson(questsObject, writer);
         } catch (IOException exception) {
-            IndustriaDailies.LOGGER.error("Failed to write json file defaults.");
+            IndustriaDailies.LOGGER.error("Failed to write {} file defaults.", this.fileName);
             exception.printStackTrace();
         }
     }
