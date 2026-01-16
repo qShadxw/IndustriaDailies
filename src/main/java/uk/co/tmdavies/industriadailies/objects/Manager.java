@@ -254,6 +254,10 @@ public class Manager {
             return false;
         }
 
+        if (getPersonalQuestFromId(player, questId).isCompleted()) {
+            return false;
+        }
+
         List<Quest> personalQuests =  playerQuests.get(player.getStringUUID());
         Quest quest = null;
 

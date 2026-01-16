@@ -59,13 +59,12 @@ public class MainCommand {
                             }
 
                             target.sendSystemMessage(Utils.Chat("Completed quest %s [%s]", quest.getObjective(), quest.getId()));
+                            IndustriaDailies.manager.setQuestAsCompleted(target, questId);
 
                             if (quest.getRewardItemId().equals("irs")) {
                                 IndustriaDailies.neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), String.format("Completed %s", quest.getId()));
                                 break;
                             }
-
-                            IndustriaDailies.manager.setQuestAsCompleted(target, questId);
 
                             target.getInventory().add(quest.getReward());
                             break;

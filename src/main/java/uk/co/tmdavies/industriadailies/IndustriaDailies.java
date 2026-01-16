@@ -60,4 +60,5 @@ public class IndustriaDailies {
     public void onRegisterCommands(RegisterCommandsEvent event) {
         MainCommand.register(event.getDispatcher());
     }
+
 }
