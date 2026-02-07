@@ -44,6 +44,14 @@ public class Quest {
         return amountNeeded;
     }
 
+    public ItemStack getItemNeededAsItemstack() {
+        String[] itemInfo = itemNeeded.split(":");
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(itemInfo[0], itemInfo[1]);
+        Item item = BuiltInRegistries.ITEM.get(id);
+
+        return new ItemStack(item);
+    }
+
     public String getRewardItemId() {
         return rewardItemId;
     }

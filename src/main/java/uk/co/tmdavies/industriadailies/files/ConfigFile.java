@@ -97,7 +97,7 @@ public class ConfigFile {
         // Default Reward Object
         JsonObject rewardObject = new JsonObject();
         rewardObject.addProperty("_comment", "If you want custom money, put irs in ItemId, amount is the amount of money to give.");
-        rewardObject.addProperty("ItemId", "gachamachine:gacha_coin");
+        rewardObject.addProperty("ItemId", "minecraft:gold_ingot");
         rewardObject.addProperty("Amount", 1);
 
         // First Template Section Object

@@ -249,7 +249,7 @@ public class Manager {
         playerQuests.put(player.getStringUUID(), quests);
     }
 
-    public boolean completeQuest(Player player, String questId) {
+    public boolean completeQuest(Player player, String questId, ItemStack item) {
         if (!playerQuests.containsKey(player.getStringUUID())) {
             return false;
         }
@@ -272,7 +272,6 @@ public class Manager {
             return false;
         }
 
-        ItemStack item = player.getMainHandItem();
         ResourceLocation id = item.getItem().builtInRegistryHolder().key().location();
 
         if (!id.toString().equals(quest.getItemNeeded())) {
@@ -285,12 +284,7 @@ public class Manager {
             return false;
         }
 
-        if ((itemCount - quest.getAmountNeeded()) <= 0) {
-            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        } else {
-            item.setCount(itemCount - quest.getAmountNeeded());
-            player.setItemInHand(InteractionHand.MAIN_HAND, item);
-        }
+        item.setCount(Math.max((itemCount - quest.getAmountNeeded()), 0));
 
         return true;
     }
