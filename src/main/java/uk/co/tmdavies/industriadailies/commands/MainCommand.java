@@ -27,28 +27,34 @@ public class MainCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(commandName)
-                .then(Commands.literal("complete")
+                .then(
+                        Commands.literal("complete")
                         .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("quest_id", StringArgumentType.string())
                                 .executes(MainCommand::completeOption)))
                 )
-                .then(Commands.literal("completeall")
+                .then(
+                        Commands.literal("completeall")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(MainCommand::completeAllOption))
                 )
-                .then(Commands.literal("give")
+                .then(
+                        Commands.literal("give")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(MainCommand::giveOption))
                 )
-                .then(Commands.literal("delete")
+                .then(
+                        Commands.literal("delete")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(MainCommand::deleteOption))
                 )
-                .then(Commands.literal("what")
+                .then(
+                        Commands.literal("what")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(MainCommand::whatOption))
                 )
-                .then(Commands.literal("open")
+                .then(
+                        Commands.literal("open")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(MainCommand::openOption))
                 )
