@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
 import uk.co.tmdavies.industriadailies.objects.Quest;
+import uk.co.tmdavies.industriadailies.uis.ChestUIController;
 import uk.co.tmdavies.industriadailies.utils.Utils;
 
 import java.util.List;
@@ -104,6 +105,16 @@ public class MainCommand {
 
                     return 1;
                 }))))
+                .then(Commands.literal("open")
+                        .then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> {
+
+                            Player p = EntityArgument.getPlayer(context, "player");
+                            ChestUIController.openDailies(p, 54);
+
+                            return -1;
+                        }
+                        )))
         );
     }
 }
