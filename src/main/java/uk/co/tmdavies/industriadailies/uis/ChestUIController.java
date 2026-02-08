@@ -51,7 +51,7 @@ public class ChestUIController {
                 ItemStack itemStack = quest.getReward();
                 itemStack.setCount(1);
                 itemStack.set(DataComponents.ITEM_NAME, Utils.Chat("&f" + quest.getObjective() + ", to receive " + quest.getRewardItemId()));
-                container.setItem(20 + (count.getAndIncrement() * 2), itemStack);
+                container.setItem(18 + (count.getAndIncrement() * 2), itemStack);
             });
 
             openMenu(player, size, container);
