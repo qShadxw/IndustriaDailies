@@ -36,10 +36,10 @@ public class IndustriaDailies {
 
     private final ScheduledExecutorService SCHEDULER =
             Executors.newSingleThreadScheduledExecutor(r -> {
-                Thread changeTaskThread = new Thread(r, "MOTD-ChangeTask");
-                changeTaskThread.setDaemon(true);
+                Thread poolingTaskThread = new Thread(r, "ID-PoolingTask");
+                poolingTaskThread.setDaemon(true);
 
-                return changeTaskThread;
+                return poolingTaskThread;
             });
 
     public IndustriaDailies(IEventBus modEventBus, ModContainer modContainer) {
