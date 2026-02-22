@@ -56,12 +56,9 @@ public class ConfigFile {
 
         if (file.length() == 0) {
             switch (this.fileName) {
-                case "config.json":
-                    setDefaultsForConfig();
-                    break;
-                case "neonetworkirs.json":
-                    setDefaultsForNNIRS();
-                    break;
+                case "config.json" -> setDefaultsForConfig();
+                case "neonetworkirs.json" -> setDefaultsForNNIRS();
+                case "database.json" -> setDefaultsForDB();
             }
         }
 
@@ -70,27 +67,27 @@ public class ConfigFile {
         } catch (IOException e) {
             IndustriaDailies.LOGGER.error("Error loading config file. Continuing to create new...");
         }
+    }
 
-        //verboseConfig();
+    public void setDefaultsForDB() {
+        JsonObject dbObject = new JsonObject();
+        dbObject.addProperty("Host", "unset");
+        dbObject.addProperty("Port", "unset");
+        dbObject.addProperty("DB", "IndustriaDailies_Data");
+        dbObject.addProperty("User", "DB_User");
+        dbObject.addProperty("Pass", "DB_Pass");
+
+        pushToFile(dbObject);
     }
 
     public void setDefaultsForNNIRS() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
         JsonObject irsObject = new JsonObject();
         irsObject.addProperty("apikey", "01189998819991197253");
 
-        try (FileWriter writer = new FileWriter(this.path + "/" + this.fileName)) {
-            gson.toJson(irsObject, writer);
-        } catch (IOException exception) {
-            IndustriaDailies.LOGGER.error("Failed to write {} file defaults.", this.fileName);
-            exception.printStackTrace();
-        }
+        pushToFile(irsObject);
     }
 
     public void setDefaultsForConfig() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
         // Main Object
         JsonObject questsObject = new JsonObject();
 
@@ -153,11 +150,16 @@ public class ConfigFile {
 
         questsObject.add("Quests", sectionObject);
 
+        pushToFile(questsObject);
+    }
+
+    public void pushToFile(JsonObject objectToPush) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
         try (FileWriter writer = new FileWriter(this.path + "/" + this.fileName)) {
-            gson.toJson(questsObject, writer);
+            gson.toJson(objectToPush, writer);
         } catch (IOException exception) {
-            IndustriaDailies.LOGGER.error("Failed to write {} file defaults.", this.fileName);
-            exception.printStackTrace();
+            IndustriaDailies.LOGGER.error("Failed to write {} file defaults. \n{}", this.fileName, exception);
         }
     }
 
