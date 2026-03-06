@@ -54,6 +54,7 @@ public class IndustriaDailies {
 
         manager = new Manager();
         manager.loadQuests();
+        manager.initSaveData(event.getServer());
     }
 
     @SubscribeEvent

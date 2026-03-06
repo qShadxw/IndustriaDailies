@@ -1,15 +1,25 @@
 package uk.co.tmdavies.industriadailies.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.sun.jdi.connect.Connector;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -17,6 +27,8 @@ import uk.co.tmdavies.industriadailies.IndustriaDailies;
 import uk.co.tmdavies.industriadailies.objects.Quest;
 import uk.co.tmdavies.industriadailies.uis.ChestUIController;
 import uk.co.tmdavies.industriadailies.utils.Utils;
+import static uk.co.tmdavies.industriadailies.IndustriaDailies.LOGGER;
+import static uk.co.tmdavies.industriadailies.IndustriaDailies.manager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +54,20 @@ public class MainCommand {
                         Commands.literal("give")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(MainCommand::giveOption))
+                )
+                .then(
+                        Commands.literal("giveSet")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .then(Commands.argument("stringId", StringArgumentType.greedyString())
+                                                .executes(MainCommand::giveSetOption))
+                                )
+                )
+                .then(
+                        Commands.literal("completeSet")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .then(Commands.argument("stringId", StringArgumentType.greedyString())
+                                                .executes(MainCommand::isCompleteOption))
+                                )
                 )
                 .then(
                         Commands.literal("delete")
@@ -200,6 +226,102 @@ public class MainCommand {
 
         sender.sendSystemMessage(Component.literal(String.format("Giving %s their daily missions.", target.getName())));
         IndustriaDailies.manager.generateQuestsForPlayer(target);
+        return 1;
+    }
+
+    public static int giveSetOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Object[] extraction = extractContext(context);
+
+        if (extraction == null) {
+            return 0;
+        }
+
+        Player target = (Player) extraction[2];
+
+        if (target == null) {
+            LOGGER.error("Tried to give a quest to a null player ");
+            return 0;
+        }
+
+        String name = StringArgumentType.getString(context, "stringId");
+
+        if (manager.addSetQuest(name, target))
+        {
+            return 0;
+        }
+
+        Component title = Component.literal("Quest Accepted").withStyle(ChatFormatting.GOLD);
+        ClientboundSetTitlesAnimationPacket animationPacket = new ClientboundSetTitlesAnimationPacket(10, 70, 20);
+
+        ClientboundSetTitleTextPacket titlePacket = new ClientboundSetTitleTextPacket(title);
+
+        ServerPlayer sp = (ServerPlayer) target;
+        sp.serverLevel().playSound(
+                null,
+                sp.getX(),
+                sp.getY(),
+                sp.getZ(),
+                SoundEvents.AMETHYST_BLOCK_RESONATE,
+                SoundSource.MASTER,
+                10.0F,
+                1.0F
+        );
+        sp.connection.send(animationPacket);
+        sp.connection.send(titlePacket);
+        return 1;
+    }
+
+    public static int isCompleteOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Object[] extract = extractContext(context);
+
+        if (extract == null) {
+            return 0;
+        }
+
+        ServerPlayer sender = (ServerPlayer) extract[1];
+        Player target = (Player) extract[2];
+        String questId = StringArgumentType.getString(context, "stringId");
+
+        if (questId == null || questId.isEmpty()) {
+            LOGGER.error("No quest ID provided");
+            return 0;
+        }
+
+        boolean isCompleted = IndustriaDailies.manager.completeSetQuest(target, questId, target.getItemInHand(InteractionHand.MAIN_HAND));
+
+        if (!isCompleted) {
+            return 0;
+        }
+
+        Quest quest = IndustriaDailies.manager.getPlayersSetQuest(target, questId);
+
+        Component title = Component.literal("Quest Completed").withStyle(ChatFormatting.GOLD);
+        ClientboundSetTitlesAnimationPacket animationPacket = new ClientboundSetTitlesAnimationPacket(10, 70, 20);
+
+        ClientboundSetTitleTextPacket titlePacket = new ClientboundSetTitleTextPacket(title);
+
+        ServerPlayer sp = (ServerPlayer) target;
+        sp.serverLevel().playSound(
+                null,
+                sp.getX(),
+                sp.getY(),
+                sp.getZ(),
+                SoundEvents.PLAYER_LEVELUP,
+                SoundSource.MASTER,
+                10.0F,
+                1.0F
+        );
+        sp.connection.send(animationPacket);
+        sp.connection.send(titlePacket);
+
+        IndustriaDailies.manager.setSetQuestAsCompleted(target, questId);
+
+        if (quest.getRewardItemId().equals("irs")) {
+            IndustriaDailies.neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), String.format("Completed %s", quest.getId()));
+            return 0;
+        }
+
+        target.getInventory().add(quest.getReward());
         return 1;
     }
 

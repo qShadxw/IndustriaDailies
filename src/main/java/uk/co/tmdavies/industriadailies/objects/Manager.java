@@ -2,10 +2,12 @@ package uk.co.tmdavies.industriadailies.objects;
 
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
+import uk.co.tmdavies.industriadailies.savedata.TargetDataStorage;
 
 import java.util.*;
 
@@ -14,12 +16,16 @@ public class Manager {
     private final Random random;
 
     private final HashMap<String, List<Quest>> playerQuests;
+    public HashMap<String, ArrayList<Quest>> playerSetQuests;
     private final List<QuestSection> questSections;
+    public ArrayList<Quest> setQuests;
 
     public Manager() {
         random = new Random();
         playerQuests = new HashMap<>();
         questSections = new ArrayList<>();
+        playerSetQuests = new HashMap<>();
+        setQuests = new ArrayList<>();
     }
 
     public boolean initPlayer(Player player) {
@@ -29,6 +35,108 @@ public class Manager {
         playerQuests.put(player.getStringUUID(), new ArrayList<>());
         return true;
     }
+
+    public void initSaveData(MinecraftServer server)
+    {
+        playerSetQuests = TargetDataStorage.playerLoad(server);
+        setQuests = TargetDataStorage.questLoad(server);
+    }
+
+
+    public boolean addSetQuest(String id, Player p)
+    {
+        for (int i = 0; i < setQuests.size(); i++)
+        {
+            if (Objects.equals(setQuests.get(i).getId(), id))
+            {
+                playerSetQuests.computeIfAbsent(p.getStringUUID(), k -> new ArrayList<>());
+                ArrayList<Quest> tempQuestStor = playerSetQuests.get(p.getStringUUID());
+                tempQuestStor.add(setQuests.get(i));
+                playerSetQuests.put(p.getStringUUID(), tempQuestStor);
+                tempQuestStor = null;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Quest getSetQuest(String id)
+    {
+        for (int i = 0; i < setQuests.size(); i++)
+        {
+            if (Objects.equals(setQuests.get(i).getId(), id))
+            {
+                return setQuests.get(i);
+            }
+        }
+
+        return null;
+    }
+
+    public Quest getPlayersSetQuest(Player p, String id)
+    {
+        if (!playerQuests.containsKey(p.getStringUUID())) {
+            return null;
+        }
+
+        IndustriaDailies.LOGGER.info("Get Quest from id " + id);
+
+        for (Quest quests : getPersonalQuests(p)) {
+            if (quests.getId().equals(id)) {
+                return quests;
+            }
+        }
+
+        return null;
+    }
+
+    public void setSetQuestAsCompleted(Player player, String questId) {
+        Quest quest = getPlayersSetQuest(player, questId);
+
+        playerSetQuests.get(player.getStringUUID()).remove(quest);
+
+        quest.setCompleted(true);
+
+        playerSetQuests.get(player.getStringUUID()).add(quest);
+    }
+
+    public boolean completeSetQuest(Player player, String questId, ItemStack item) {
+        if (!playerSetQuests.containsKey(player.getStringUUID())) {
+            return false;
+        }
+
+        List<Quest> setQuests =  playerSetQuests.get(player.getStringUUID());
+        Quest quest = null;
+
+        for (Quest quests : setQuests) {
+            if (Objects.equals(quests.getId(), questId)) {
+                quest = quests;
+                break;
+            }
+        }
+        if (quest == null) {
+            return false;
+        }
+
+        ResourceLocation id = item.getItem().builtInRegistryHolder().key().location();
+
+        if (!id.toString().equals(quest.getItemNeeded()) && quest.getItemNeeded() != "null") {
+            return false;
+        }
+
+        int itemCount = item.getCount();
+
+        if (itemCount < quest.getAmountNeeded() && quest.getAmountNeeded() != -1) {
+            return false;
+        }
+
+        if(quest.getAmountNeeded() != -1) item.setCount(Math.max((itemCount - quest.getAmountNeeded()), 0));
+
+        return true;
+    }
+
+
 
     public HashMap<String, List<Quest>> getPlayerQuests() {
         return playerQuests;

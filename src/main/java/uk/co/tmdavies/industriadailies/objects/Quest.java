@@ -28,6 +28,7 @@ public class Quest {
         this.completed = false;
     }
 
+
     public String getId() {
         return id;
     }
