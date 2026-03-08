@@ -198,11 +198,11 @@ public class MainCommand {
             return 0;
         }
 
-        ServerPlayer sender = (ServerPlayer) extraction[1];
-        Player target = (Player) extraction[1];
+        //ServerPlayer sender = (ServerPlayer) extraction[1];
+        Player target = (Player) extraction[2];
 
         if (!IndustriaDailies.manager.hasQuests(target)) {
-            sender.sendSystemMessage(Utils.Chat("%s does not have quests to complete.", target.getName()));
+            //sender.sendSystemMessage(Utils.Chat("%s does not have quests to complete.", target.getName()));
             return 1;
         }
 
