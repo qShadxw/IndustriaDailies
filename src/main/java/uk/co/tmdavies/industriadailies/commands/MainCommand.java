@@ -278,16 +278,16 @@ public class MainCommand {
             return 0;
         }
 
-        ServerPlayer sender = (ServerPlayer) extraction[1];
+        //ServerPlayer sender = (ServerPlayer) extraction[1];
         Player target = (Player) extraction[2];
 
         if (IndustriaDailies.manager.hasQuests(target)) {
-            sender.sendSystemMessage(Component.literal(String.format("%s already has quests.", target.getName())));
+            //sender.sendSystemMessage(Component.literal(String.format("%s already has quests.", target.getName())));
 
             return 0;
         }
 
-        sender.sendSystemMessage(Component.literal(String.format("Giving %s their daily missions.", target.getName())));
+        //sender.sendSystemMessage(Component.literal(String.format("Giving %s their daily missions.", target.getName())));
         IndustriaDailies.manager.generateQuestsForPlayer(target);
         return 1;
     }
