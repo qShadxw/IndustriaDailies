@@ -2,6 +2,7 @@ package uk.co.tmdavies.industriadailies.savedata;
 
 import com.google.common.reflect.TypeToken;
 import net.minecraft.server.MinecraftServer;
+import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
 import uk.co.tmdavies.industriadailies.objects.Manager;
 import uk.co.tmdavies.industriadailies.objects.Quest;
 
@@ -18,6 +19,8 @@ import static uk.co.tmdavies.industriadailies.IndustriaDailies.manager;
 public class TargetDataStorage {
     private static final Type LIST_TYPE = new TypeToken<List<Quest>>() {}.getType();
     private static final Type HASH_TYPE = new TypeToken<HashMap<String, ArrayList<Quest>>>() {}.getType();
+    private static final Type POS_LIST_TYPE = new TypeToken<List<DefinedPositions>>() {}.getType();
+
 
     public static void playerSave(MinecraftServer server)
     {
@@ -115,6 +118,59 @@ public class TargetDataStorage {
             if (json.length() < 4) return new ArrayList<Quest>();
 
             ArrayList<Quest> data = ModJson.GSON.fromJson(json, LIST_TYPE);
+
+            return data != null ? data : new ArrayList<>();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public static void posSave(MinecraftServer server)
+    {
+        try{
+            Path file = ModDataPath.getPosDataFile(server);
+
+            Path parent = file.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+
+            String json;
+            if (DefinedPositions.posistions.isEmpty())
+            {
+                json = ModJson.GSON.toJson(new ArrayList<DefinedPositions>());
+            }
+            else
+            {
+                json = ModJson.GSON.toJson(DefinedPositions.posistions);
+            }
+
+
+            Files.writeString(file, json);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static ArrayList<DefinedPositions> posLoad(MinecraftServer server)
+    {
+        try{
+            Path file = ModDataPath.getPosDataFile(server);
+
+            if (Files.exists(file) == false)
+            {
+                posSave(server);
+                return new ArrayList<DefinedPositions>();
+            }
+
+            String json = Files.readString(file);
+            if (json.length() < 4) return new ArrayList<DefinedPositions>();
+
+            ArrayList<DefinedPositions> data = ModJson.GSON.fromJson(json, POS_LIST_TYPE);
 
             return data != null ? data : new ArrayList<>();
 

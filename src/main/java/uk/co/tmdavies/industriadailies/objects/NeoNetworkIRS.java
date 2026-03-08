@@ -70,7 +70,7 @@ public class NeoNetworkIRS {
             IndustriaDailies.LOGGER.error("Unable complete request [{}] [{}] [{}]", target.getName().getString(), amount, ref);
             exception.printStackTrace();
         }
-        target.sendSystemMessage(Utils.Chat("&a+£%s", amount));
+        target.sendSystemMessage(Utils.Chat("&a+%s", amount));
         target.sendSystemMessage(Utils.Chat("&aRef: %s", ref));
     }
 
