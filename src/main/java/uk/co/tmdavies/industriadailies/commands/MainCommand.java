@@ -342,7 +342,6 @@ public class MainCommand {
         Player target = EntityArgument.getPlayer(context, "player");
         String questId = StringArgumentType.getString(context, "stringId");
 
-        LOGGER.info(questId);
         if (questId == null || questId.isEmpty()) {
             LOGGER.error("No quest ID provided");
             return 0;
@@ -350,7 +349,11 @@ public class MainCommand {
 
 
         Quest quest = IndustriaDailies.manager.getPlayersSetQuest(target, questId);
-        LOGGER.info(quest.questName);
+        if (quest == null)
+        {
+            LOGGER.error("Wrong QuestID Provided");
+            return 0;
+        }
 
 
         if (manager.fullQuestCheckComplete(target, quest, target))
