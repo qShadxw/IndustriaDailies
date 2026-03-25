@@ -98,8 +98,17 @@ public class QuestUI extends ChestMenu {
 
         if (!playerQuests.isEmpty()) {
             AtomicInteger count = new AtomicInteger(1);
+
             playerQuests.forEach(quest -> {
-                ItemStack itemStack = createItem(quest.getItemNeeded(), quest.getObjective() + ", to receive " + quest.getRewardItemId(), "null", "");
+                String rec = quest.getRewardItemId();
+                if (rec == "irs") {
+                    rec = "¢" + quest.getRewardItemAmount();
+                }
+                else
+                {
+                    rec = rec.replace("_", " ");
+                }
+                ItemStack itemStack = createItem(quest.getItemNeeded(), quest.getObjective() + ", to receive " + rec, "null", "");
                 this.cont.setItem(18 + (count.getAndIncrement() * 2), itemStack);
             });
 
