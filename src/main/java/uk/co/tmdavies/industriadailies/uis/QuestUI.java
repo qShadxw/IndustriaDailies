@@ -101,12 +101,13 @@ public class QuestUI extends ChestMenu {
 
             playerQuests.forEach(quest -> {
                 String rec = quest.getRewardItemId();
-                if (rec == "irs") {
+                if (rec.equals("irs")) {
                     rec = "¢" + quest.getRewardItemAmount();
                 }
                 else
                 {
                     rec = rec.replace("_", " ");
+                    rec = rec.substring(rec.indexOf(":") + 1);
                 }
                 ItemStack itemStack = createItem(quest.getItemNeeded(), quest.getObjective() + ", to receive " + rec, "null", "");
                 this.cont.setItem(18 + (count.getAndIncrement() * 2), itemStack);
