@@ -30,10 +30,8 @@ public class Utils {
         sp.connection.send(titlePacket);
     }
 
-    public static void displayTitle(Player player, String text, ChatFormatting col)
-    {
-        displayTitle((ServerPlayer) player, text, col);
-    }
+    public static void displayTitle(Player player, String text, ChatFormatting col) { displayTitle((ServerPlayer) player, text, col); }
+
 
     public static void playSound(ServerPlayer sp, SoundEvent se)
     {

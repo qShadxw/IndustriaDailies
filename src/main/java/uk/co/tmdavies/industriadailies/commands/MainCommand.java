@@ -23,22 +23,25 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.openjdk.nashorn.internal.runtime.Context;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
+import uk.co.tmdavies.industriadailies.objects.DayTracker;
 import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
 import uk.co.tmdavies.industriadailies.objects.Quest;
 import uk.co.tmdavies.industriadailies.savedata.TargetDataStorage;
 import uk.co.tmdavies.industriadailies.uis.ChestUIController;
 import uk.co.tmdavies.industriadailies.utils.Utils;
-import static uk.co.tmdavies.industriadailies.IndustriaDailies.LOGGER;
-import static uk.co.tmdavies.industriadailies.IndustriaDailies.manager;
+import xyz.neonetwork.neolib.utilities.NeoNotify;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static uk.co.tmdavies.industriadailies.IndustriaDailies.*;
 
 public class MainCommand {
 
@@ -88,6 +91,11 @@ public class MainCommand {
                                                 .executes(MainCommand::deleteSetQuest))
                                 )
                 )
+                .then(
+                    Commands.literal("reset")
+                        .executes(MainCommand::reset)
+                )
+
                 .then(
                         Commands.literal("what")
                         .then(Commands.argument("player", EntityArgument.player())
@@ -245,29 +253,36 @@ public class MainCommand {
             IndustriaDailies.LOGGER.info("Completed Quest");
             target.sendSystemMessage(Utils.Chat("Completed quest %s [%s]", quest.getObjective(), quest.getId()));
             IndustriaDailies.manager.setQuestAsCompleted(target, quest.getId());
-            target.getInventory().add(quest.getReward());
+            if(Objects.equals(quest.getRewardItemId(), "irs"))
+            {
+                neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), "Daily Quest Complete");
+            }
+            else {
+                target.getInventory().add(quest.getReward());
+            }
+
         });
         return 1;
     }
 
     public static int deleteOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Object[] extraction = extractContext(context);
+        //Object[] extraction = extractContext(context);
 
-        if (extraction == null) {
-            return 0;
-        }
+        //if (extraction == null) {
+            //return 0;
+        //}
 
-        ServerPlayer sender = (ServerPlayer) extraction[1];
-        Player target = (Player) extraction[2];
+        //ServerPlayer sender = (ServerPlayer) extraction[1];
+        Player target = EntityArgument.getPlayer(context, "player");
 
         if (!IndustriaDailies.manager.hasQuests(target)) {
-            sender.sendSystemMessage(Utils.Chat("%s does not have quests to delete.", target.getName()));
+            //sender.sendSystemMessage(Utils.Chat("%s does not have quests to delete.", target.getName()));
             return 1;
         }
 
         IndustriaDailies.manager.resetPlayer(target);
-        sender.sendSystemMessage(Component.literal(String.format("%s's quests has been deleted.", target.getName())));
-        target.sendSystemMessage(Component.literal("Your quests have been deleted."));
+        //sender.sendSystemMessage(Component.literal(String.format("%s's quests has been deleted.", target.getName())));
+        //target.sendSystemMessage(Component.literal("Your quests have been deleted."));
         return 1;
     }
 
@@ -281,14 +296,25 @@ public class MainCommand {
         //ServerPlayer sender = (ServerPlayer) extraction[1];
         Player target = (Player) extraction[2];
 
-        if (IndustriaDailies.manager.hasQuests(target)) {
-            //sender.sendSystemMessage(Component.literal(String.format("%s already has quests.", target.getName())));
-
+        if (DayTracker.hasGot(target.getUUID()))
+        {
+            NeoNotify.sendTitle((ServerPlayer)target, Component.literal("You already got quests today"), Component.literal(""));
             return 0;
+        }
+
+        DayTracker.add(target.getUUID());
+
+        if (IndustriaDailies.manager.hasQuests(target)) {
+            IndustriaDailies.manager.resetPlayer(target);
         }
 
         //sender.sendSystemMessage(Component.literal(String.format("Giving %s their daily missions.", target.getName())));
         IndustriaDailies.manager.generateQuestsForPlayer(target);
+        return 1;
+    }
+
+    public static int reset(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        DayTracker.forceReset();
         return 1;
     }
 
@@ -387,13 +413,15 @@ public class MainCommand {
     }
 
     public static int openOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Object[] extraction = extractContext(context);
+        //Object[] extraction = extractContext(context);
 
-        if (extraction == null) {
-            return 0;
-        }
+        //if (extraction == null) {
+        //    return 0;
+        //}
 
-        Player target = (Player) extraction[1];
+
+
+        Player target = EntityArgument.getPlayer(context, "player");
 
         ChestUIController.openQuests(target, 54);
         return 1;
