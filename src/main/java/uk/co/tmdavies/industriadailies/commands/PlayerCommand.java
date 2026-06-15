@@ -20,13 +20,14 @@ public class PlayerCommand {
     }
 
     public static int openOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-
         Player player = context.getSource().getPlayer();
+
         if (player == null) {
             return 0;
         }
 
         ChestUIController.openQuests(player, 54);
+
         return 1;
     }
 }

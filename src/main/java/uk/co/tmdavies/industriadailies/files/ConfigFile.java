@@ -58,7 +58,10 @@ public class ConfigFile {
             switch (this.fileName) {
                 case "config.json" -> setDefaultsForConfig();
                 case "neonetworkirs.json" -> setDefaultsForNNIRS();
-                case "database.json" -> setDefaultsForDB();
+                default -> {
+                    IndustriaDailies.LOGGER.error("Unknown Config Name Supplied. [{}]", this.fileName);
+                    break;
+                }
             }
         }
 
@@ -67,17 +70,6 @@ public class ConfigFile {
         } catch (IOException e) {
             IndustriaDailies.LOGGER.error("Error loading config file. Continuing to create new...");
         }
-    }
-
-    public void setDefaultsForDB() {
-        JsonObject dbObject = new JsonObject();
-        dbObject.addProperty("Host", "unset");
-        dbObject.addProperty("Port", "unset");
-        dbObject.addProperty("DB", "IndustriaDailies_Data");
-        dbObject.addProperty("User", "DB_User");
-        dbObject.addProperty("Pass", "DB_Pass");
-
-        pushToFile(dbObject);
     }
 
     public void setDefaultsForNNIRS() {

@@ -206,11 +206,9 @@ public class MainCommand {
             return 0;
         }
 
-        //ServerPlayer sender = (ServerPlayer) extraction[1];
         Player target = (Player) extraction[2];
 
         if (!IndustriaDailies.manager.hasQuests(target)) {
-            //sender.sendSystemMessage(Utils.Chat("%s does not have quests to complete.", target.getName()));
             return 1;
         }
 
@@ -232,23 +230,6 @@ public class MainCommand {
             }
         }
 
-        /*
-        target.getInventory().items.forEach(item -> {
-            if (item.toString().equals("0 minecraft:air")) {
-                return;
-            }
-
-
-
-            playerQuests.forEach(quest -> {
-                if (completedQuests.contains(quest) && !IndustriaDailies.manager.completeQuest(target, quest.getId(), item) ) {
-                    return;
-                }
-                completedQuests.add(quest);
-            });
-        });
-        */
-
         completedQuests.forEach(quest -> {
             IndustriaDailies.LOGGER.info("Completed Quest");
             target.sendSystemMessage(Utils.Chat("Completed quest %s [%s]", quest.getObjective(), quest.getId()));
@@ -266,23 +247,13 @@ public class MainCommand {
     }
 
     public static int deleteOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        //Object[] extraction = extractContext(context);
-
-        //if (extraction == null) {
-            //return 0;
-        //}
-
-        //ServerPlayer sender = (ServerPlayer) extraction[1];
         Player target = EntityArgument.getPlayer(context, "player");
 
         if (!IndustriaDailies.manager.hasQuests(target)) {
-            //sender.sendSystemMessage(Utils.Chat("%s does not have quests to delete.", target.getName()));
             return 1;
         }
 
         IndustriaDailies.manager.resetPlayer(target);
-        //sender.sendSystemMessage(Component.literal(String.format("%s's quests has been deleted.", target.getName())));
-        //target.sendSystemMessage(Component.literal("Your quests have been deleted."));
         return 1;
     }
 
@@ -293,7 +264,6 @@ public class MainCommand {
             return 0;
         }
 
-        //ServerPlayer sender = (ServerPlayer) extraction[1];
         Player target = (Player) extraction[2];
 
         if (DayTracker.hasGot(target.getUUID()))
@@ -308,7 +278,6 @@ public class MainCommand {
             IndustriaDailies.manager.resetPlayer(target);
         }
 
-        //sender.sendSystemMessage(Component.literal(String.format("Giving %s their daily missions.", target.getName())));
         IndustriaDailies.manager.generateQuestsForPlayer(target);
         return 1;
     }
@@ -413,14 +382,6 @@ public class MainCommand {
     }
 
     public static int openOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        //Object[] extraction = extractContext(context);
-
-        //if (extraction == null) {
-        //    return 0;
-        //}
-
-
-
         Player target = EntityArgument.getPlayer(context, "player");
 
         ChestUIController.openQuests(target, 54);
@@ -450,9 +411,7 @@ public class MainCommand {
         DefinedPositions.posistions.add(new DefinedPositions(newPos, maxDist, name));
         context.getSource().sendSuccess(() -> Component.literal("Made new DefinedPosition"), false);
 
-        new Thread(() -> {
-            TargetDataStorage.posSave(context.getSource().getServer());
-        }).start();
+        new Thread(() -> TargetDataStorage.posSave(context.getSource().getServer())).start();
 
         return 1;
     }
@@ -470,18 +429,19 @@ public class MainCommand {
         Vec3 handInPos = Vec3Argument.getVec3(context, "handInPos");
         String required = StringArgumentType.getString(context, "required");
         String[] realRequired;
-        try
-        {
+
+        try {
             realRequired = required.split(",");
         } catch (RuntimeException e) {
             context.getSource().sendSuccess(() -> Component.literal("required field invalid"), false);
+
             return 0;
         }
+
         String talkTo = StringArgumentType.getString(context, "talkTo");
         String handIn = StringArgumentType.getString(context, "handIn");
 
         manager.setQuests.add(new Quest(name, id, objective, itemNeeded, amountNeeded, rewarditemId, rewarditemAmount, weight, handInPos, realRequired, talkTo, handIn));
-
         manager.saveSaveData(context.getSource().getServer());
 
         context.getSource().sendSuccess(() -> Component.literal("Quest " + name + " has been created"), false);

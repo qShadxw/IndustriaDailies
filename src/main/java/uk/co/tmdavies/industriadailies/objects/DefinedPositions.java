@@ -8,23 +8,19 @@ import java.util.ArrayList;
 
 public class DefinedPositions {
     public static ArrayList<DefinedPositions> posistions;
-    public static void init(MinecraftServer server)
-    {
-        DefinedPositions.posistions = new ArrayList<>();
-        DefinedPositions.posistions = TargetDataStorage.posLoad(server);
-    }
+    public Vec3 pos;
+    public double maxDist;
+    public String name;
 
-
-    public DefinedPositions(Vec3 pos, double maxDist, String name)
-    {
+    public DefinedPositions(Vec3 pos, double maxDist, String name) {
         this.pos = pos;
         this.maxDist = maxDist;
         this.name = name;
     }
 
-
-    public Vec3 pos;
-    public double maxDist;
-    public String name;
+    public static void init(MinecraftServer server) {
+        DefinedPositions.posistions = new ArrayList<>();
+        DefinedPositions.posistions = TargetDataStorage.posLoad(server);
+    }
 }
 

@@ -4,11 +4,9 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreAccess;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
@@ -354,8 +352,7 @@ public class Manager {
                         quests.get("Amount-Needed").getAsInt(),
                         rewardObject.get("ItemId").getAsString(),
                         rewardObject.get("Amount").getAsInt(),
-                        quests.get("Weight").getAsInt(),
-                        false
+                        quests.get("Weight").getAsInt()
                 );
                 questList.add(quest);
             }

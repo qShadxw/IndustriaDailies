@@ -3,7 +3,6 @@ package uk.co.tmdavies.industriadailies.savedata;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.server.MinecraftServer;
 import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
-import uk.co.tmdavies.industriadailies.objects.Manager;
 import uk.co.tmdavies.industriadailies.objects.Quest;
 
 import java.io.IOException;
@@ -21,10 +20,8 @@ public class TargetDataStorage {
     private static final Type HASH_TYPE = new TypeToken<HashMap<String, ArrayList<Quest>>>() {}.getType();
     private static final Type POS_LIST_TYPE = new TypeToken<List<DefinedPositions>>() {}.getType();
 
-
-    public static void playerSave(MinecraftServer server)
-    {
-        try{
+    public static void playerSave(MinecraftServer server) {
+        try {
             Path file = ModDataPath.getPlayerDataFile(server);
 
             Path parent = file.getParent();
@@ -33,147 +30,127 @@ public class TargetDataStorage {
             }
 
             String json;
-            if (manager.playerSetQuests.isEmpty())
-            {
+            if (manager.playerSetQuests.isEmpty()) {
                 json = ModJson.GSON.toJson(new HashMap<String, ArrayList<Quest>>());
-            }
-            else
-            {
+            } else {
                 json = ModJson.GSON.toJson(manager.playerSetQuests);
             }
 
             Files.writeString(file, json);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static HashMap<String, ArrayList<Quest>> playerLoad(MinecraftServer server)
-    {
-        try{
+    public static HashMap<String, ArrayList<Quest>> playerLoad(MinecraftServer server) {
+        try {
             Path file = ModDataPath.getPlayerDataFile(server);
 
-            if (Files.exists(file) == false)
-            {
+            if (!Files.exists(file)) {
                 playerSave(server);
-                return new HashMap<String, ArrayList<Quest>>();
+                return new HashMap<>();
             }
 
             String json = Files.readString(file);
-            if (json.length() < 4) return new HashMap<String, ArrayList<Quest>>();
+            if (json.length() < 4) return new HashMap<>();
 
             HashMap<String, ArrayList<Quest>> data = ModJson.GSON.fromJson(json, HASH_TYPE);
 
-            return data != null ? data : new HashMap<String, ArrayList<Quest>>();
-
+            return data != null ? data : new HashMap<>();
         } catch (IOException e) {
             e.printStackTrace();
-            return new HashMap<String, ArrayList<Quest>>();
+            return new HashMap<>();
         }
     }
 
-    public static void questSave(MinecraftServer server)
-    {
-        try{
+    public static void questSave(MinecraftServer server) {
+        try {
             Path file = ModDataPath.getQuestDataFile(server);
-
             Path parent = file.getParent();
+
             if (parent != null) {
                 Files.createDirectories(parent);
             }
 
             String json;
-            if (manager.setQuests.isEmpty())
-            {
+
+            if (manager.setQuests.isEmpty()) {
                 json = ModJson.GSON.toJson(new ArrayList<Quest>());
-            }
-            else
-            {
+            } else {
                 json = ModJson.GSON.toJson(manager.setQuests);
             }
 
-
             Files.writeString(file, json);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static ArrayList<Quest> questLoad(MinecraftServer server)
-    {
-        try{
+    public static ArrayList<Quest> questLoad(MinecraftServer server) {
+        try {
             Path file = ModDataPath.getQuestDataFile(server);
 
-            if (Files.exists(file) == false)
-            {
+            if (!Files.exists(file)) {
                 questSave(server);
-                return new ArrayList<Quest>();
+                return new ArrayList<>();
             }
 
             String json = Files.readString(file);
-            if (json.length() < 4) return new ArrayList<Quest>();
+
+            if (json.length() < 4) {
+                return new ArrayList<>();
+            }
 
             ArrayList<Quest> data = ModJson.GSON.fromJson(json, LIST_TYPE);
 
             return data != null ? data : new ArrayList<>();
-
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
 
-    public static void posSave(MinecraftServer server)
-    {
-        try{
+    public static void posSave(MinecraftServer server) {
+        try {
             Path file = ModDataPath.getPosDataFile(server);
-
             Path parent = file.getParent();
+
             if (parent != null) {
                 Files.createDirectories(parent);
             }
 
             String json;
-            if (DefinedPositions.posistions.isEmpty())
-            {
+
+            if (DefinedPositions.posistions.isEmpty()) {
                 json = ModJson.GSON.toJson(new ArrayList<DefinedPositions>());
-            }
-            else
-            {
+            } else {
                 json = ModJson.GSON.toJson(DefinedPositions.posistions);
             }
 
-
             Files.writeString(file, json);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static ArrayList<DefinedPositions> posLoad(MinecraftServer server)
-    {
-        try{
+    public static ArrayList<DefinedPositions> posLoad(MinecraftServer server) {
+        try {
             Path file = ModDataPath.getPosDataFile(server);
 
-            if (Files.exists(file) == false)
-            {
+            if (Files.exists(file) == false) {
                 posSave(server);
-                return new ArrayList<DefinedPositions>();
+                return new ArrayList<>();
             }
 
             String json = Files.readString(file);
-            if (json.length() < 4) return new ArrayList<DefinedPositions>();
+
+            if (json.length() < 4) {
+                return new ArrayList<>();
+            }
 
             ArrayList<DefinedPositions> data = ModJson.GSON.fromJson(json, POS_LIST_TYPE);
 
             return data != null ? data : new ArrayList<>();
-
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
