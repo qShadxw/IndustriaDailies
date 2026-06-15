@@ -34,6 +34,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import uk.co.tmdavies.industriadailies.commands.MainCommand;
 import uk.co.tmdavies.industriadailies.commands.PlayerCommand;
 import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
+import uk.co.tmdavies.industriadailies.objects.Database;
 import uk.co.tmdavies.industriadailies.objects.Manager;
 import uk.co.tmdavies.industriadailies.files.ConfigFile;
 import uk.co.tmdavies.industriadailies.objects.NeoNetworkIRS;
@@ -43,6 +44,9 @@ import uk.co.tmdavies.industriadailies.utils.Utils;
 
 import java.util.List;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 @Mod(IndustriaDailies.MODID)
 public class IndustriaDailies {
 
@@ -51,8 +55,18 @@ public class IndustriaDailies {
 
     public static ConfigFile configFile;
     public static ConfigFile irsFile;
+    public static ConfigFile databaseFile;
     public static Manager manager;
     public static NeoNetworkIRS neoNetworkIRS;
+    public static Database database;
+
+    private final ScheduledExecutorService SCHEDULER =
+            Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread poolingTaskThread = new Thread(r, "ID-PoolingTask");
+                poolingTaskThread.setDaemon(true);
+
+                return poolingTaskThread;
+            });
 
     public IndustriaDailies(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
@@ -76,6 +90,11 @@ public class IndustriaDailies {
         irsFile = new ConfigFile("neonetworkirs");
         irsFile.loadConfig();
 
+        // Database Config
+        databaseFile = new ConfigFile("database");
+        databaseFile.loadConfig();
+
+        // Load NeoNetworkIRS API
         neoNetworkIRS = new NeoNetworkIRS(irsFile.getElement("apikey").getAsString());
 
         DefinedPositions.init(event.getServer());
