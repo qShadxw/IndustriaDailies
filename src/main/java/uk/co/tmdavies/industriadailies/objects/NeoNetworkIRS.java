@@ -23,7 +23,7 @@ public class NeoNetworkIRS {
 
     public void giveMoney(Player target, int amount, String ref) {
         try {
-            URL obj = new URL("https://irs.neonetwork.xyz/api/send");
+            URL obj = new URL("https://irs.ejmdev.co.uk/api/send");
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
             con.setRequestMethod("POST");
@@ -70,7 +70,7 @@ public class NeoNetworkIRS {
             IndustriaDailies.LOGGER.error("Unable complete request [{}] [{}] [{}]", target.getName().getString(), amount, ref);
             exception.printStackTrace();
         }
-        target.sendSystemMessage(Utils.Chat("&a+£%s", amount));
+        target.sendSystemMessage(Utils.Chat("&a+%s", amount));
         target.sendSystemMessage(Utils.Chat("&aRef: %s", ref));
     }
 
