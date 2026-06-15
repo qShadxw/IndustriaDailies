@@ -77,8 +77,7 @@ public class IndustriaDailies {
     }
 
     @SubscribeEvent
-    public void onServerStopping(ServerStoppingEvent event)
-    {
+    public void onServerStopping(ServerStoppingEvent event) {
         manager.saveSaveData(event.getServer());
     }
 

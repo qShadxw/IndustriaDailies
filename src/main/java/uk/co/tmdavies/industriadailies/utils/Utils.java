@@ -1,14 +1,17 @@
 package uk.co.tmdavies.industriadailies.utils;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
 
 import java.io.IOException;
@@ -51,5 +54,27 @@ public class Utils {
 
     public static void playSound(Player p, SoundEvent se) {
         playSound((ServerPlayer) p, se);
+    }
+
+    public static ResourceLocation getResourceLocationFromString(String locString) {
+        String[] locStrings = locString.split(":");
+
+        return ResourceLocation.fromNamespaceAndPath(locStrings[0], locStrings[1]);
+    }
+
+    public static ItemStack getItemStackFromResourceLocation(ResourceLocation location) {
+        return BuiltInRegistries.ITEM.get(location).getDefaultInstance();
+    }
+
+    public static ItemStack getItemStackFromString(String locString) {
+        return getItemStackFromResourceLocation(getResourceLocationFromString(locString));
+    }
+
+    public static ItemStack getItemStackFromString(String locString, int amount) {
+        ItemStack itemStack = getItemStackFromString(locString);
+
+        itemStack.setCount(amount);
+
+        return itemStack;
     }
 }

@@ -80,9 +80,6 @@ public class ConfigFile {
     }
 
     public void setDefaultsForConfig() {
-        // Main Object
-        JsonObject questsObject = new JsonObject();
-
         // Default Reward Object
         JsonObject rewardObject = new JsonObject();
         rewardObject.addProperty("_comment", "If you want custom money, put irs in ItemId, amount is the amount of money to give.");
@@ -140,9 +137,16 @@ public class ConfigFile {
         sectionObject.add("Section1", templateFirstSection);
         sectionObject.add("Section2", templateSecondSection);
 
-        questsObject.add("Quests", sectionObject);
+        JsonObject rerollObject = new JsonObject();
+        rerollObject.addProperty("Item", "minecraft:dirt");
+        rerollObject.addProperty("Amount", 1);
 
-        pushToFile(questsObject);
+        JsonObject configObject = new JsonObject();
+
+        configObject.add("Reroll", rerollObject);
+        configObject.add("Quests", sectionObject);
+
+        pushToFile(configObject);
     }
 
     public void pushToFile(JsonObject objectToPush) {

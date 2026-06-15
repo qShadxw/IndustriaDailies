@@ -195,8 +195,7 @@ public class QuestUI extends ChestMenu {
             }
         }
 
-        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(id));
-        ItemStack itemStack = new ItemStack(item);
+        ItemStack itemStack = Utils.getItemStackFromString(id);
         CompoundTag itemTag = new CompoundTag();
         itemTag.putString("res:tag", tag);
         itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(itemTag));

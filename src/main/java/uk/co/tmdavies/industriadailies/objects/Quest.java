@@ -6,6 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
+import uk.co.tmdavies.industriadailies.utils.Utils;
 
 import java.util.Objects;
 
@@ -77,11 +78,7 @@ public class Quest {
     }
 
     public ItemStack getItemNeededAsItemstack() {
-        String[] itemInfo = itemNeeded.split(":");
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(itemInfo[0], itemInfo[1]);
-        Item item = BuiltInRegistries.ITEM.get(id);
-
-        return new ItemStack(item);
+        return Utils.getItemStackFromString(itemNeeded);
     }
 
     public String getRewardItemId() {
@@ -101,13 +98,7 @@ public class Quest {
     }
 
     public ItemStack getReward() {
-        String[] itemInfo = rewardItemId.split(":");
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(itemInfo[0], itemInfo[1]);
-        Item item = BuiltInRegistries.ITEM.get(id);
-        ItemStack itemStack = new ItemStack(item);
-
-        itemStack.setCount(this.rewardItemAmount);
-        return itemStack;
+        return Utils.getItemStackFromString(rewardItemId, rewardItemAmount);
     }
 
     public void setCompleted(boolean completed) {

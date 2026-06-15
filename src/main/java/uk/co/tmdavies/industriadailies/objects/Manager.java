@@ -2,6 +2,7 @@ package uk.co.tmdavies.industriadailies.objects;
 
 import com.google.gson.JsonObject;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -9,6 +10,7 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreAccess;
@@ -30,6 +32,8 @@ public class Manager {
     public HashMap<String, Integer> playerRerolls;
     private final List<QuestSection> questSections;
     public ArrayList<Quest> setQuests;
+
+    public ItemStack rerollItem;
 
     public Manager() {
         random = new Random();
@@ -357,6 +361,11 @@ public class Manager {
             questSections.add(new QuestSection(sectionObject.get("Weight").getAsInt(), questList));
         }
 
+        JsonObject rerollObject = IndustriaDailies.configFile.get("Reroll");
+        String itemResource = rerollObject.get("Item").getAsString();
+        int itemAmount = rerollObject.get("Amount").getAsInt();
+
+        this.rerollItem = Utils.getItemStackFromString(itemResource, itemAmount);
     }
 
     public Quest getRandomQuest() {
@@ -504,6 +513,40 @@ public class Manager {
                 NeoNotify.sendToast(serverPlayer, Component.literal("Unable to reroll quests").withStyle(ChatFormatting.RED), Component.literal("No rerolls left").withStyle(ChatFormatting.RED), NeoTexture.GENERIC);
             } else {
                 Utils.displayTitle(player, "Unable to reroll quests", ChatFormatting.RED);
+            }
+
+            return;
+        }
+
+        if (player.getInventory().contains(this.rerollItem)) {
+            ItemStack playerRerollItem = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(this.rerollItem));
+
+            if (playerRerollItem.getCount() >= this.rerollItem.getCount()) {
+                playerRerollItem.setCount(playerRerollItem.getCount()-this.rerollItem.getCount());
+            } else {
+                if (player instanceof ServerPlayer serverPlayer) {
+                    NeoNotify.sendToast(
+                            serverPlayer,
+                            Component.literal("Invalid Reroll Cost").withStyle(ChatFormatting.RED),
+                            Component.literal(String.format("You need %sx%s.", this.rerollItem.getCount(), this.rerollItem.getDisplayName().getString())),
+                            NeoTexture.GENERIC
+                    );
+                } else {
+                    Utils.displayTitle(player, String.format("You need %sx%s.", this.rerollItem.getCount(), this.rerollItem.getDisplayName().getString()), ChatFormatting.RED);
+                }
+
+                return;
+            }
+        } else {
+            if (player instanceof ServerPlayer serverPlayer) {
+                NeoNotify.sendToast(
+                        serverPlayer,
+                        Component.literal("Invalid Reroll Cost").withStyle(ChatFormatting.RED),
+                        Component.literal(String.format("You need %sx%s.", this.rerollItem.getCount(), this.rerollItem.getDisplayName().getString())),
+                        NeoTexture.GENERIC
+                );
+            } else {
+                Utils.displayTitle(player, String.format("You need %sx%s.", this.rerollItem.getCount(), this.rerollItem.getDisplayName().getString()), ChatFormatting.RED);
             }
 
             return;
