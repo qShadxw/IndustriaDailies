@@ -5,28 +5,17 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.text2speech.Narrator;
-import com.sun.jdi.connect.Connector;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.openjdk.nashorn.internal.runtime.Context;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
 import uk.co.tmdavies.industriadailies.objects.DayTracker;
 import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
@@ -36,12 +25,9 @@ import uk.co.tmdavies.industriadailies.uis.ChestUIController;
 import uk.co.tmdavies.industriadailies.utils.Utils;
 import xyz.neonetwork.neolib.utilities.NeoNotify;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static uk.co.tmdavies.industriadailies.IndustriaDailies.*;
 
 public class MainCommand {
 
@@ -93,9 +79,8 @@ public class MainCommand {
                 )
                 .then(
                     Commands.literal("reset")
-                        .executes(MainCommand::reset)
+                        .executes(MainCommand::resetOption)
                 )
-
                 .then(
                         Commands.literal("what")
                         .then(Commands.argument("player", EntityArgument.player())
@@ -105,6 +90,11 @@ public class MainCommand {
                         Commands.literal("open")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(MainCommand::openOption))
+                )
+                .then(
+                        Commands.literal("reroll")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(MainCommand::rerollOption))
                 )
                 .then(
                         Commands.literal("newdefinedpos")
@@ -215,8 +205,7 @@ public class MainCommand {
         List<Quest> playerQuests = IndustriaDailies.manager.getPersonalQuests(target);
         List<Quest> completedQuests = new ArrayList<>();
 
-        for (int i = 0; i < playerQuests.size(); i++)
-        {
+        for (int i = 0; i < playerQuests.size(); i++) {
             if (target.getInventory().contains(playerQuests.get(i).getItemNeededAsItemstack())) {
                 if (target.getInventory().getItem(target.getInventory().findSlotMatchingItem(playerQuests.get(i).getItemNeededAsItemstack())).getCount() >= playerQuests.get(i).getAmountNeeded()) {
                     if (completedQuests.contains(playerQuests.get(i)) || playerQuests.get(i).isCompleted()) {
@@ -234,14 +223,12 @@ public class MainCommand {
             IndustriaDailies.LOGGER.info("Completed Quest");
             target.sendSystemMessage(Utils.Chat("Completed quest %s [%s]", quest.getObjective(), quest.getId()));
             IndustriaDailies.manager.setQuestAsCompleted(target, quest.getId());
-            if(Objects.equals(quest.getRewardItemId(), "irs"))
-            {
-                neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), "Daily Quest Complete");
-            }
-            else {
+
+            if (Objects.equals(quest.getRewardItemId(), "irs")) {
+                IndustriaDailies.neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), "Daily Quest Complete");
+            } else {
                 target.getInventory().add(quest.getReward());
             }
-
         });
         return 1;
     }
@@ -266,9 +253,9 @@ public class MainCommand {
 
         Player target = (Player) extraction[2];
 
-        if (DayTracker.hasGot(target.getUUID()))
-        {
+        if (DayTracker.hasGot(target.getUUID())) {
             NeoNotify.sendTitle((ServerPlayer)target, Component.literal("You already got quests today"), Component.literal(""));
+
             return 0;
         }
 
@@ -279,11 +266,28 @@ public class MainCommand {
         }
 
         IndustriaDailies.manager.generateQuestsForPlayer(target);
+        IndustriaDailies.manager.givePlayerRerolls(target);
+
         return 1;
     }
 
-    public static int reset(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int resetOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         DayTracker.forceReset();
+
+        return 1;
+    }
+
+    public static int rerollOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Object[] extract = extractContext(context);
+
+        if (extract == null) {
+            return 0;
+        }
+
+        Player target = (Player) extract[2];
+
+        IndustriaDailies.manager.rerollQuests(target);
+
         return 1;
     }
 
@@ -297,34 +301,32 @@ public class MainCommand {
         Player target = (Player) extraction[2];
 
         if (target == null) {
-            LOGGER.error("Tried to give a quest to a null player ");
+            IndustriaDailies.LOGGER.error("Tried to give a quest to a null player ");
             return 0;
         }
 
         String name = StringArgumentType.getString(context, "stringId");
 
-        if (manager.addSetQuest(name, target))
-        {
+        if (IndustriaDailies.manager.addSetQuest(name, target)) {
             return 0;
         }
 
         Utils.displayTitle(target, "Quest Accepted!", ChatFormatting.GOLD);
         Utils.playSound(target, SoundEvents.AMETHYST_BLOCK_RESONATE);
 
-        manager.saveSaveData(target.getServer());
+        IndustriaDailies.manager.saveSaveData(target.getServer());
+
         return 1;
     }
 
-    public static int deleteSetQuest(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
-    {
+    public static int deleteSetQuest(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Player p = EntityArgument.getPlayer(context, "player");
         String questid = StringArgumentType.getString(context, "questid");
 
-        for (int i = 0; i < manager.getPlayerSetQuests(p).size(); i++)
-        {
-            if (Objects.equals(manager.getPlayerSetQuests(p).get(i).getId(), questid))
-            {
-                manager.getPlayerSetQuests(p).remove(i);
+        for (int i = 0; i < IndustriaDailies.manager.getPlayerSetQuests(p).size(); i++) {
+            if (Objects.equals(IndustriaDailies.manager.getPlayerSetQuests(p).get(i).getId(), questid)) {
+                IndustriaDailies.manager.getPlayerSetQuests(p).remove(i);
+
                 return 1;
             }
         }
@@ -333,30 +335,28 @@ public class MainCommand {
     }
 
     public static int isCompleteOption(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-
         Player target = EntityArgument.getPlayer(context, "player");
         String questId = StringArgumentType.getString(context, "stringId");
 
         if (questId == null || questId.isEmpty()) {
-            LOGGER.error("No quest ID provided");
+            IndustriaDailies.LOGGER.error("No quest ID provided");
+
             return 0;
         }
-
 
         Quest quest = IndustriaDailies.manager.getPlayersSetQuest(target, questId);
-        if (quest == null)
-        {
-            LOGGER.error("Wrong QuestID Provided");
+
+        if (quest == null) {
+            IndustriaDailies.LOGGER.error("Wrong QuestID Provided");
+
             return 0;
         }
 
 
-        if (manager.fullQuestCheckComplete(target, quest, target))
-        {
+        if (IndustriaDailies.manager.fullQuestCheckComplete(target, quest, target)) {
             Utils.displayTitle(target, "Quest Completed!", ChatFormatting.GOLD);
             Utils.playSound(target, SoundEvents.PLAYER_LEVELUP);
         }
-
 
         return 1;
     }
@@ -389,22 +389,22 @@ public class MainCommand {
     }
 
     public static int newDefinedPos(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-
         Vec3 newPos = Vec3Argument.getVec3(context, "pos");
+
         if (newPos == null)
         {
             return 0;
         }
 
         int maxDist = IntegerArgumentType.getInteger(context, "dist");
-        if (maxDist < 0)
-        {
+
+        if (maxDist < 0) {
             return 0;
         }
 
         String name = StringArgumentType.getString(context, "name");
-        if (name == null)
-        {
+
+        if (name == null) {
             return 0;
         }
 
@@ -416,8 +416,7 @@ public class MainCommand {
         return 1;
     }
 
-    public static int newQuest(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
-    {
+    public static int newQuest(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         String name = StringArgumentType.getString(context, "name");
         String id = StringArgumentType.getString(context, "id");
         String objective = StringArgumentType.getString(context, "objective");
@@ -441,12 +440,11 @@ public class MainCommand {
         String talkTo = StringArgumentType.getString(context, "talkTo");
         String handIn = StringArgumentType.getString(context, "handIn");
 
-        manager.setQuests.add(new Quest(name, id, objective, itemNeeded, amountNeeded, rewarditemId, rewarditemAmount, weight, handInPos, realRequired, talkTo, handIn));
-        manager.saveSaveData(context.getSource().getServer());
+        IndustriaDailies.manager.setQuests.add(new Quest(name, id, objective, itemNeeded, amountNeeded, rewarditemId, rewarditemAmount, weight, handInPos, realRequired, talkTo, handIn));
+        IndustriaDailies.manager.saveSaveData(context.getSource().getServer());
 
         context.getSource().sendSuccess(() -> Component.literal("Quest " + name + " has been created"), false);
 
         return 1;
     }
-
 }

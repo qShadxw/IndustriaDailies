@@ -1,9 +1,12 @@
 package uk.co.tmdavies.industriadailies.objects;
 
 import com.google.gson.JsonObject;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -11,107 +14,100 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreAccess;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
 import uk.co.tmdavies.industriadailies.savedata.TargetDataStorage;
+import uk.co.tmdavies.industriadailies.utils.Utils;
+import xyz.neonetwork.neolib.textures.NeoTexture;
+import xyz.neonetwork.neolib.utilities.NeoNotify;
 
 import java.util.*;
 
-import static com.mojang.text2speech.Narrator.LOGGER;
-
 public class Manager {
 
+    private final int maxRerolls = 3;
     private final Random random;
 
     private final HashMap<String, List<Quest>> playerQuests;
     public HashMap<String, ArrayList<Quest>> playerSetQuests;
+    public HashMap<String, Integer> playerRerolls;
     private final List<QuestSection> questSections;
     public ArrayList<Quest> setQuests;
 
     public Manager() {
         random = new Random();
         playerQuests = new HashMap<>();
-        questSections = new ArrayList<>();
         playerSetQuests = new HashMap<>();
+        playerRerolls = new HashMap<>();
+        questSections = new ArrayList<>();
         setQuests = new ArrayList<>();
     }
 
-    public boolean initPlayer(Player player) {
-        if (playerQuests.containsKey(player.getStringUUID())) {
-            return false;
-        }
-        playerQuests.put(player.getStringUUID(), new ArrayList<>());
-        return true;
-    }
-
-    public void initSaveData(MinecraftServer server)
-    {
+    public void initSaveData(MinecraftServer server) {
         playerSetQuests = TargetDataStorage.playerLoad(server);
         setQuests = TargetDataStorage.questLoad(server);
     }
 
-    public void saveSaveData(MinecraftServer server)
-    {
+    public void saveSaveData(MinecraftServer server) {
         new Thread(() -> {
             TargetDataStorage.playerSave(server);
             TargetDataStorage.questSave(server);
         }).start();
     }
 
+    public boolean fullQuestCheckComplete(Player player, Quest quest, Entity target) {
+        if (quest == null) {
+            return false;
+        }
 
-
-    public boolean fullQuestCheckComplete(Player player, Quest quest, Entity target)
-    {
-        if (quest == null) return false;
-        if (quest.isCompleted()) return false;
+        if (quest.isCompleted()) {
+            return false;
+        }
 
         if (player.getInventory().contains(quest.getItemNeededAsItemstack())) {
             if (player.getInventory().getItem(player.getInventory().findSlotMatchingItem(quest.getItemNeededAsItemstack())).getCount() >= quest.getAmountNeeded()) {
                 quest.setCompleted(true);
                 player.getInventory().removeItem(player.getInventory().findSlotMatchingItem(quest.getItemNeededAsItemstack()), quest.getAmountNeeded());
-            }
-            else
-            {
+            } else {
                 return false;
             }
-        }
-        else
-        {
+        } else {
             return false;
         }
 
         if (((quest.getTalkTo() != null) && !quest.getTalkTo().isEmpty()) && !quest.hasTalkedTo) {
-            //LOGGER.info("here " + quest.getTalkTo());
             return false;
         }
 
         this.setSetQuestAsCompleted(player, quest.getId());
+
         if (quest.getRewardItemId().equals("irs")) {
             IndustriaDailies.neoNetworkIRS.giveMoney(player, quest.getRewardItemAmount(), String.format("Completed %s", quest.getId()));
-        }
-        else {
+        } else {
             player.getInventory().add(quest.getReward());
         }
+
         ServerScoreboard scoreboard = player.getServer().getScoreboard();
         Objective objective = scoreboard.getObjective(quest.getId());
-        if (objective != null)
-        {
+
+        if (objective != null) {
             ScoreAccess score = scoreboard.getOrCreatePlayerScore(player, objective);
             score.add(1);
         }
 
         this.saveSaveData(player.getServer());
+
         return true;
     }
 
-    public boolean addSetQuest(String id, Player p)
-    {
-        for (int i = 0; i < setQuests.size(); i++)
-        {
-            if (Objects.equals(setQuests.get(i).getId(), id))
-            {
+    public boolean addSetQuest(String id, Player p) {
+        for (int i = 0; i < setQuests.size(); i++) {
+            if (Objects.equals(setQuests.get(i).getId(), id)) {
                 playerSetQuests.computeIfAbsent(p.getStringUUID(), k -> new ArrayList<>());
 
-                if (playerSetQuests.get(p.getStringUUID()).contains(setQuests.get(i))) return true;
+                if (playerSetQuests.get(p.getStringUUID()).contains(setQuests.get(i))) {
+                    return true;
+                }
 
                 playerSetQuests.get(p.getStringUUID()).add(setQuests.get(i).copy());
+
                 return false;
             }
         }
@@ -119,12 +115,9 @@ public class Manager {
         return true;
     }
 
-    public Quest getSetQuest(String id)
-    {
-        for (int i = 0; i < setQuests.size(); i++)
-        {
-            if (Objects.equals(setQuests.get(i).getId(), id))
-            {
+    public Quest getSetQuest(String id) {
+        for (int i = 0; i < setQuests.size(); i++) {
+            if (Objects.equals(setQuests.get(i).getId(), id)) {
                 return setQuests.get(i);
             }
         }
@@ -132,8 +125,7 @@ public class Manager {
         return null;
     }
 
-    public Quest getPlayersSetQuest(Player p, String id)
-    {
+    public Quest getPlayersSetQuest(Player p, String id) {
         if (!playerSetQuests.containsKey(p.getStringUUID())) {
             return null;
         }
@@ -169,10 +161,8 @@ public class Manager {
 
     public boolean completeSetQuests(Player player, String questId, ItemStack item, UUID runner) {
         if (!playerSetQuests.containsKey(player.getStringUUID())) {
-            LOGGER.info("Here");
             return false;
         }
-        LOGGER.info("Here1");
 
         List<Quest> setQuests =  playerSetQuests.get(player.getStringUUID());
         Quest quest = null;
@@ -180,39 +170,33 @@ public class Manager {
         for (Quest quests : setQuests) {
             if (Objects.equals(quests.getId(), questId)) {
                 if (quests.getHandIn() != null && !(quests.checkHandIn(runner.toString()))) return false;
-                LOGGER.info("Here2");
                 quest = quests;
+
                 break;
             }
         }
         if (quest == null) {
-            LOGGER.info("Here3");
             return false;
         }
 
         ResourceLocation id = item.getItem().builtInRegistryHolder().key().location();
-        LOGGER.info("Here4");
 
         if (!id.toString().equals(quest.getItemNeeded()) && quest.getItemNeeded() != "null") {
-            LOGGER.info("Here5");
             return false;
         }
 
         int itemCount = item.getCount();
-        LOGGER.info("Here5.5");
 
         if (itemCount < quest.getAmountNeeded() && quest.getAmountNeeded() != -1) {
-            LOGGER.info("Here6");
             return false;
         }
 
-        if(quest.getAmountNeeded() != -1) item.setCount(Math.max((itemCount - quest.getAmountNeeded()), 0));
-        LOGGER.info("Here 7");
+        if (quest.getAmountNeeded() != -1) {
+            item.setCount(Math.max((itemCount - quest.getAmountNeeded()), 0));
+        }
 
         return true;
     }
-
-
 
     public HashMap<String, List<Quest>> getPlayerQuests() {
         return playerQuests;
@@ -238,6 +222,14 @@ public class Manager {
         return playerSetQuests.get(player.getStringUUID());
     }
 
+    public int getPlayerRerolls(Player player) {
+        if (!playerRerolls.containsKey(player.getStringUUID())) {
+            playerRerolls.put(player.getStringUUID(), 3);
+        }
+
+        return playerRerolls.get(player.getStringUUID());
+    }
+
     public Quest getPersonalQuestFromId(Player player, String id) {
         if (!playerQuests.containsKey(player.getStringUUID())) {
             return null;
@@ -260,6 +252,7 @@ public class Manager {
         }
 
         questSections.add(questSection);
+
         return true;
     }
 
@@ -269,6 +262,7 @@ public class Manager {
         }
 
         questSections.remove(questSection);
+
         return true;
     }
 
@@ -285,6 +279,7 @@ public class Manager {
 
         quests.add(quest);
         playerQuests.replace(player.getStringUUID(), quests);
+
         return true;
     }
 
@@ -301,6 +296,7 @@ public class Manager {
 
         quests.remove(quest);
         playerQuests.replace(player.getStringUUID(), quests);
+
         return true;
     }
 
@@ -310,6 +306,7 @@ public class Manager {
         }
 
         playerQuests.remove(player.getStringUUID());
+
         return true;
     }
 
@@ -420,13 +417,14 @@ public class Manager {
         List<Quest> quests = getPersonalQuests(player);
         boolean temp;
 
-        for (int i = 0; quests.size() < 3; i++) {
+        while (quests.size() < 3) {
             temp = false;
             Quest quest = this.getRandomQuest();
 
             for (Quest questList : quests) {
                 if (Objects.equals(questList.getId(), quest.getId())) {
                     temp = true;
+                    break;
                 }
             }
 
@@ -438,6 +436,10 @@ public class Manager {
         }
 
         playerQuests.put(player.getStringUUID(), quests);
+    }
+
+    public void givePlayerRerolls(Player player) {
+        this.playerRerolls.put(player.getStringUUID(), this.maxRerolls);
     }
 
     public boolean completeQuest(Player player, String questId, ItemStack item) {
@@ -492,6 +494,42 @@ public class Manager {
 
     public boolean hasQuests(Player player) {
         return playerQuests.containsKey(player.getStringUUID());
+    }
+
+    public void rerollQuests(Player player) {
+        int rerolls = getPlayerRerolls(player);
+
+        if (rerolls == 0) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                NeoNotify.sendToast(serverPlayer, Component.literal("Unable to reroll quests").withStyle(ChatFormatting.RED), Component.literal("No rerolls left").withStyle(ChatFormatting.RED), NeoTexture.GENERIC);
+            } else {
+                Utils.displayTitle(player, "Unable to reroll quests", ChatFormatting.RED);
+            }
+
+            return;
+        }
+
+        rerolls--;
+
+        List<Quest> playerQuests = getPersonalQuests(player);
+        List<Quest> replacedQuests = new ArrayList<>();
+
+        playerQuests.forEach(quest -> {
+            if (quest.isCompleted()) {
+                replacedQuests.add(quest);
+            }
+        });
+
+        this.playerQuests.replace(player.getStringUUID(), replacedQuests);
+        this.playerRerolls.replace(player.getStringUUID(), rerolls);
+
+        generateQuestsForPlayer(player);
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            NeoNotify.sendToast(serverPlayer, Component.literal("Rerolled quests").withStyle(ChatFormatting.GREEN), Component.literal("Rerolls left: " + rerolls).withStyle(ChatFormatting.GREEN), NeoTexture.GENERIC);
+        } else {
+            Utils.displayTitle(player, "Rerolled quests", ChatFormatting.GREEN);
+        }
     }
 
     public void verboseManager() {

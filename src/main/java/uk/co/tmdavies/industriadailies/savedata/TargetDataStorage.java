@@ -25,11 +25,13 @@ public class TargetDataStorage {
             Path file = ModDataPath.getPlayerDataFile(server);
 
             Path parent = file.getParent();
+
             if (parent != null) {
                 Files.createDirectories(parent);
             }
 
             String json;
+
             if (manager.playerSetQuests.isEmpty()) {
                 json = ModJson.GSON.toJson(new HashMap<String, ArrayList<Quest>>());
             } else {
@@ -52,7 +54,10 @@ public class TargetDataStorage {
             }
 
             String json = Files.readString(file);
-            if (json.length() < 4) return new HashMap<>();
+
+            if (json.length() < 4) {
+                return new HashMap<>();
+            }
 
             HashMap<String, ArrayList<Quest>> data = ModJson.GSON.fromJson(json, HASH_TYPE);
 
