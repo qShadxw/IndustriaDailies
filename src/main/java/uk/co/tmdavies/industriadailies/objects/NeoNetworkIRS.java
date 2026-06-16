@@ -2,7 +2,6 @@ package uk.co.tmdavies.industriadailies.objects;
 
 import net.minecraft.world.entity.player.Player;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;
-import uk.co.tmdavies.industriadailies.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -65,13 +64,10 @@ public class NeoNetworkIRS {
             }
 
             in.close();
-            IndustriaDailies.LOGGER.info(response.toString());
         } catch (Exception exception) {
             IndustriaDailies.LOGGER.error("Unable complete request [{}] [{}] [{}]", target.getName().getString(), amount, ref);
             exception.printStackTrace();
         }
-        target.sendSystemMessage(Utils.Chat("&a+%s", amount));
-        target.sendSystemMessage(Utils.Chat("&aRef: %s", ref));
     }
 
 }

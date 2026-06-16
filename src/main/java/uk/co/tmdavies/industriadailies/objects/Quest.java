@@ -1,8 +1,5 @@
 package uk.co.tmdavies.industriadailies.objects;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import uk.co.tmdavies.industriadailies.IndustriaDailies;

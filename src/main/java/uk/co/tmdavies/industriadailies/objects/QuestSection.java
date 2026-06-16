@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record QuestSection(int weight, List<Quest> quests) {
-
     public QuestSection(int weight) {
         this(weight, new ArrayList<>());
     }

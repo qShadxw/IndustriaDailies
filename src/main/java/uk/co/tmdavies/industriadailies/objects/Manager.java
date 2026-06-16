@@ -2,7 +2,6 @@ package uk.co.tmdavies.industriadailies.objects;
 
 import com.google.gson.JsonObject;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -10,7 +9,6 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreAccess;
@@ -27,6 +25,7 @@ public class Manager {
     private final int maxRerolls = 3;
     private final Random random;
 
+    private final int maxPersonalQuests = 3;
     private final HashMap<String, List<Quest>> playerQuests;
     public HashMap<String, ArrayList<Quest>> playerSetQuests;
     public HashMap<String, Integer> playerRerolls;
@@ -239,8 +238,6 @@ public class Manager {
             return null;
         }
 
-        IndustriaDailies.LOGGER.info("Get Quest from id " + id);
-
         for (Quest quests : getPersonalQuests(player)) {
             if (quests.getId().equals(id)) {
                 return quests;
@@ -361,6 +358,7 @@ public class Manager {
             questSections.add(new QuestSection(sectionObject.get("Weight").getAsInt(), questList));
         }
 
+        // Init Reroll item
         JsonObject rerollObject = IndustriaDailies.configFile.get("Reroll");
         String itemResource = rerollObject.get("Item").getAsString();
         int itemAmount = rerollObject.get("Amount").getAsInt();
@@ -426,7 +424,7 @@ public class Manager {
         List<Quest> quests = getPersonalQuests(player);
         boolean temp;
 
-        while (quests.size() < 3) {
+        while (quests.size() < maxPersonalQuests) {
             temp = false;
             Quest quest = this.getRandomQuest();
 
@@ -499,20 +497,72 @@ public class Manager {
         quest.setCompleted(true);
 
         playerQuests.get(player.getStringUUID()).add(quest);
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            NeoNotify.sendToast(
+                    serverPlayer,
+                    Component.literal("Quest Complete!").withStyle(ChatFormatting.GREEN),
+                    Component.literal(quest.getObjective()),
+                    NeoTexture.GENERIC
+            );
+        } else {
+            NeoNotify.sendTitle(
+                    Component.literal("Quest Complete!").withStyle(ChatFormatting.GREEN),
+                    Component.literal(quest.getObjective())
+            );
+        }
     }
 
     public boolean hasQuests(Player player) {
         return playerQuests.containsKey(player.getStringUUID());
     }
 
+    public int howManyQuestsCompleted(Player player) {
+        int completed = 0;
+
+        for (Quest quest : getPersonalQuests(player)) {
+            if (quest.isCompleted()) {
+                completed++;
+            }
+        }
+
+        return completed;
+    }
+
     public void rerollQuests(Player player) {
         int rerolls = getPlayerRerolls(player);
 
+        if (howManyQuestsCompleted(player) >= maxPersonalQuests) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                NeoNotify.sendToast(
+                        serverPlayer,
+                        Component.literal("Unable to Reroll Quests").withStyle(ChatFormatting.RED),
+                        Component.literal("All quests completed"),
+                        NeoTexture.GENERIC
+                );
+            } else {
+                NeoNotify.sendTitle(
+                        Component.literal("Unable to Reroll Quests").withStyle(ChatFormatting.RED),
+                        Component.literal("All quests completed")
+                );
+            }
+
+            return;
+        }
+
         if (rerolls == 0) {
             if (player instanceof ServerPlayer serverPlayer) {
-                NeoNotify.sendToast(serverPlayer, Component.literal("Unable to reroll quests").withStyle(ChatFormatting.RED), Component.literal("No rerolls left").withStyle(ChatFormatting.RED), NeoTexture.GENERIC);
+                NeoNotify.sendToast(
+                        serverPlayer,
+                        Component.literal("Unable to reroll quests").withStyle(ChatFormatting.RED),
+                        Component.literal("No rerolls left"),
+                        NeoTexture.GENERIC
+                );
             } else {
-                Utils.displayTitle(player, "Unable to reroll quests", ChatFormatting.RED);
+                NeoNotify.sendTitle(
+                        Component.literal("Unable to reroll quests").withStyle(ChatFormatting.RED),
+                        Component.literal("No rerolls left")
+                );
             }
 
             return;
@@ -528,11 +578,14 @@ public class Manager {
                     NeoNotify.sendToast(
                             serverPlayer,
                             Component.literal("Invalid Reroll Cost").withStyle(ChatFormatting.RED),
-                            Component.literal(String.format("You need %sx%s.", this.rerollItem.getCount(), this.rerollItem.getDisplayName().getString())),
+                            Component.literal(String.format("You need %sx %s.", this.rerollItem.getCount(), Utils.getItemStackName(this.rerollItem))),
                             NeoTexture.GENERIC
                     );
                 } else {
-                    Utils.displayTitle(player, String.format("You need %sx%s.", this.rerollItem.getCount(), this.rerollItem.getDisplayName().getString()), ChatFormatting.RED);
+                    NeoNotify.sendTitle(
+                            Component.literal("Invalid Reroll Cost").withStyle(ChatFormatting.RED),
+                            Component.literal(String.format("You need %sx %s.", this.rerollItem.getCount(), Utils.getItemStackName(this.rerollItem)))
+                    );
                 }
 
                 return;
@@ -542,11 +595,14 @@ public class Manager {
                 NeoNotify.sendToast(
                         serverPlayer,
                         Component.literal("Invalid Reroll Cost").withStyle(ChatFormatting.RED),
-                        Component.literal(String.format("You need %sx%s.", this.rerollItem.getCount(), this.rerollItem.getDisplayName().getString())),
+                        Component.literal(String.format("You need %sx %s.", this.rerollItem.getCount(), Utils.getItemStackName(this.rerollItem))),
                         NeoTexture.GENERIC
                 );
             } else {
-                Utils.displayTitle(player, String.format("You need %sx%s.", this.rerollItem.getCount(), this.rerollItem.getDisplayName().getString()), ChatFormatting.RED);
+                NeoNotify.sendTitle(
+                        Component.literal("Invalid Reroll Cost").withStyle(ChatFormatting.RED),
+                        Component.literal(String.format("You need %sx %s.", this.rerollItem.getCount(), Utils.getItemStackName(this.rerollItem)))
+                );
             }
 
             return;
@@ -569,9 +625,17 @@ public class Manager {
         generateQuestsForPlayer(player);
 
         if (player instanceof ServerPlayer serverPlayer) {
-            NeoNotify.sendToast(serverPlayer, Component.literal("Rerolled quests").withStyle(ChatFormatting.GREEN), Component.literal("Rerolls left: " + rerolls).withStyle(ChatFormatting.GREEN), NeoTexture.GENERIC);
+            NeoNotify.sendToast(
+                    serverPlayer,
+                    Component.literal("Rerolled Quests").withStyle(ChatFormatting.GREEN),
+                    Component.literal("Rerolls left: " + rerolls),
+                    NeoTexture.GENERIC
+            );
         } else {
-            Utils.displayTitle(player, "Rerolled quests", ChatFormatting.GREEN);
+            NeoNotify.sendTitle(
+                    Component.literal("Rerolled Quests").withStyle(ChatFormatting.GREEN),
+                    Component.literal("Rerolls left: " + rerolls)
+            );
         }
     }
 

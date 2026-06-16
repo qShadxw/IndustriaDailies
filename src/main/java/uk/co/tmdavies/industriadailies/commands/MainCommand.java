@@ -23,6 +23,7 @@ import uk.co.tmdavies.industriadailies.objects.Quest;
 import uk.co.tmdavies.industriadailies.savedata.TargetDataStorage;
 import uk.co.tmdavies.industriadailies.uis.ChestUIController;
 import uk.co.tmdavies.industriadailies.utils.Utils;
+import xyz.neonetwork.neolib.textures.NeoTexture;
 import xyz.neonetwork.neolib.utilities.NeoNotify;
 
 import java.util.ArrayList;
@@ -177,11 +178,10 @@ public class MainCommand {
             return 0;
         }
 
-        target.sendSystemMessage(Utils.Chat("Completed quest %s [%s]", quest.getObjective(), quest.getId()));
         IndustriaDailies.manager.setQuestAsCompleted(target, questId);
 
         if (quest.getRewardItemId().equals("irs")) {
-            IndustriaDailies.neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), String.format("Completed %s", quest.getId()));
+            IndustriaDailies.neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), String.format("Completed Quest: \"%s\"", quest.getObjective()));
             return 0;
         }
 
@@ -220,12 +220,10 @@ public class MainCommand {
         }
 
         completedQuests.forEach(quest -> {
-            IndustriaDailies.LOGGER.info("Completed Quest");
-            target.sendSystemMessage(Utils.Chat("Completed quest %s [%s]", quest.getObjective(), quest.getId()));
             IndustriaDailies.manager.setQuestAsCompleted(target, quest.getId());
 
             if (Objects.equals(quest.getRewardItemId(), "irs")) {
-                IndustriaDailies.neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), "Daily Quest Complete");
+                IndustriaDailies.neoNetworkIRS.giveMoney(target, quest.getRewardItemAmount(), String.format("Completed Quest: \"%s\"", quest.getObjective()));
             } else {
                 target.getInventory().add(quest.getReward());
             }
@@ -254,7 +252,19 @@ public class MainCommand {
         Player target = (Player) extraction[2];
 
         if (DayTracker.hasGot(target.getUUID())) {
-            NeoNotify.sendTitle((ServerPlayer)target, Component.literal("You already got quests today"), Component.literal(""));
+            if (target instanceof ServerPlayer serverPlayer) {
+                NeoNotify.sendToast(
+                        serverPlayer,
+                        Component.literal("Error").withStyle(ChatFormatting.RED),
+                        Component.literal("You've already claimed today"),
+                        NeoTexture.GENERIC
+                );
+            } else {
+                NeoNotify.sendTitle(
+                        Component.literal("Error").withStyle(ChatFormatting.RED),
+                        Component.literal("You've already claimed today")
+                );
+            }
 
             return 0;
         }
@@ -267,6 +277,20 @@ public class MainCommand {
 
         IndustriaDailies.manager.generateQuestsForPlayer(target);
         IndustriaDailies.manager.givePlayerRerolls(target);
+
+        if (target instanceof ServerPlayer serverPlayer) {
+            NeoNotify.sendToast(
+                    serverPlayer,
+                    Component.literal("Claimed Quests").withStyle(ChatFormatting.GREEN),
+                    Component.literal("Received 3 daily quests"),
+                    NeoTexture.GENERIC
+            );
+        } else {
+            NeoNotify.sendTitle(
+                    Component.literal("Claimed Quests").withStyle(ChatFormatting.GREEN),
+                    Component.literal("Received 3 daily quests")
+            );
+        }
 
         return 1;
     }

@@ -1,5 +1,6 @@
 package uk.co.tmdavies.industriadailies;
 
+import com.mojang.logging.LogUtils;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import net.minecraft.ChatFormatting;
 import net.minecraft.server.ServerScoreboard;
@@ -9,23 +10,22 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreAccess;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import org.slf4j.Logger;
-import com.mojang.logging.LogUtils;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import uk.co.tmdavies.industriadailies.commands.MainCommand;
 import uk.co.tmdavies.industriadailies.commands.PlayerCommand;
+import uk.co.tmdavies.industriadailies.files.ConfigFile;
 import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
 import uk.co.tmdavies.industriadailies.objects.Manager;
-import uk.co.tmdavies.industriadailies.files.ConfigFile;
 import uk.co.tmdavies.industriadailies.objects.NeoNetworkIRS;
 import uk.co.tmdavies.industriadailies.objects.Quest;
 import uk.co.tmdavies.industriadailies.utils.Utils;
@@ -99,7 +99,7 @@ public class IndustriaDailies {
 
         Entity target = event.getTarget();
 
-        if (target instanceof EasyNPC npc) {
+        if (target instanceof EasyNPC<?> npc) {
             List<Quest> quests = manager.playerSetQuests.get(player.getStringUUID());
 
             for (int i = 0; i < quests.size(); i++) {

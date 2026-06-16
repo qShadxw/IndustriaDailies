@@ -47,7 +47,7 @@ public class Utils {
                     1.0F
             );
         } catch (IOException exception) {
-            IndustriaDailies.LOGGER.info("Error playing sound.");
+            IndustriaDailies.LOGGER.error("Error playing sound.");
             exception.printStackTrace();
         }
     }
@@ -76,5 +76,15 @@ public class Utils {
         itemStack.setCount(amount);
 
         return itemStack;
+    }
+
+    public static String getItemStackName(ItemStack stack) {
+        String displayName = stack.getDisplayName().getString();
+
+        if (displayName.startsWith("[") && displayName.endsWith("]")) {
+            displayName = displayName.substring(1, displayName.length() - 1);
+        }
+
+        return displayName;
     }
 }
