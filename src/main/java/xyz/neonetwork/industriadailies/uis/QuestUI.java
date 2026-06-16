@@ -2,13 +2,16 @@ package xyz.neonetwork.industriadailies.uis;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import xyz.neonetwork.industriadailies.IndustriaDailies;
@@ -99,7 +102,8 @@ public class QuestUI extends ChestMenu {
                     rec = rec.substring(rec.indexOf(":") + 1);
                 }
 
-                ItemStack itemStack = createItem(quest.getItemNeeded(), quest.getObjective() + ", to receive " + rec, "null", "");
+                ItemStack itemStack = createItem(quest.getItemNeeded(), quest.getObjective() + ", to receive " + rec, "null", quest.isCompleted() ? "§aComplete" : "§cIncomplete");
+
                 this.cont.setItem(18 + (count.getAndIncrement() * 2), itemStack);
             });
 
