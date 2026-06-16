@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.utils;
+package xyz.neonetwork.industriadailies.utils;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -12,7 +12,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import uk.co.tmdavies.industriadailies.IndustriaDailies;
+import xyz.neonetwork.industriadailies.IndustriaDailies;
 
 import java.io.IOException;
 

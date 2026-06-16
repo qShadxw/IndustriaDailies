@@ -1,8 +1,8 @@
-package uk.co.tmdavies.industriadailies.files;
+package xyz.neonetwork.industriadailies.files;
 
 import com.google.gson.*;
 import org.apache.commons.io.IOUtils;
-import uk.co.tmdavies.industriadailies.IndustriaDailies;
+import xyz.neonetwork.industriadailies.IndustriaDailies;
 
 import java.io.File;
 import java.io.FileInputStream;

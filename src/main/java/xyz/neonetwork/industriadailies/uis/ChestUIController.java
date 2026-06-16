@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.uis;
+package xyz.neonetwork.industriadailies.uis;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;

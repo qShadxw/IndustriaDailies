@@ -1,9 +1,9 @@
-package uk.co.tmdavies.industriadailies.savedata;
+package xyz.neonetwork.industriadailies.savedata;
 
 import com.google.common.reflect.TypeToken;
 import net.minecraft.server.MinecraftServer;
-import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
-import uk.co.tmdavies.industriadailies.objects.Quest;
+import xyz.neonetwork.industriadailies.objects.DefinedPositions;
+import xyz.neonetwork.industriadailies.objects.Quest;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static uk.co.tmdavies.industriadailies.IndustriaDailies.manager;
+import static xyz.neonetwork.industriadailies.IndustriaDailies.manager;
 
 public class TargetDataStorage {
     private static final Type LIST_TYPE = new TypeToken<List<Quest>>() {}.getType();

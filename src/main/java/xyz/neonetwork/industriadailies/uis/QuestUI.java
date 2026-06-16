@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.uis;
+package xyz.neonetwork.industriadailies.uis;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -11,16 +11,16 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
-import uk.co.tmdavies.industriadailies.IndustriaDailies;
-import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
-import uk.co.tmdavies.industriadailies.objects.Quest;
-import uk.co.tmdavies.industriadailies.utils.Utils;
+import xyz.neonetwork.industriadailies.IndustriaDailies;
+import xyz.neonetwork.industriadailies.objects.DefinedPositions;
+import xyz.neonetwork.industriadailies.objects.Quest;
+import xyz.neonetwork.industriadailies.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static uk.co.tmdavies.industriadailies.IndustriaDailies.manager;
+import static xyz.neonetwork.industriadailies.IndustriaDailies.manager;
 
 public class QuestUI extends ChestMenu {
 

@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.objects;
+package xyz.neonetwork.industriadailies.objects;
 
 import com.google.gson.JsonObject;
 import net.minecraft.ChatFormatting;
@@ -12,9 +12,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreAccess;
-import uk.co.tmdavies.industriadailies.IndustriaDailies;
-import uk.co.tmdavies.industriadailies.savedata.TargetDataStorage;
-import uk.co.tmdavies.industriadailies.utils.Utils;
+import xyz.neonetwork.industriadailies.IndustriaDailies;
+import xyz.neonetwork.industriadailies.savedata.TargetDataStorage;
+import xyz.neonetwork.industriadailies.utils.Utils;
 import xyz.neonetwork.neolib.textures.NeoTexture;
 import xyz.neonetwork.neolib.utilities.NeoNotify;
 

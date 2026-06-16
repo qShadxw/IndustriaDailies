@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.commands;
+package xyz.neonetwork.industriadailies.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -16,13 +16,13 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import uk.co.tmdavies.industriadailies.IndustriaDailies;
-import uk.co.tmdavies.industriadailies.objects.DayTracker;
-import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
-import uk.co.tmdavies.industriadailies.objects.Quest;
-import uk.co.tmdavies.industriadailies.savedata.TargetDataStorage;
-import uk.co.tmdavies.industriadailies.uis.ChestUIController;
-import uk.co.tmdavies.industriadailies.utils.Utils;
+import xyz.neonetwork.industriadailies.IndustriaDailies;
+import xyz.neonetwork.industriadailies.objects.DayTracker;
+import xyz.neonetwork.industriadailies.objects.DefinedPositions;
+import xyz.neonetwork.industriadailies.objects.Quest;
+import xyz.neonetwork.industriadailies.savedata.TargetDataStorage;
+import xyz.neonetwork.industriadailies.uis.ChestUIController;
+import xyz.neonetwork.industriadailies.utils.Utils;
 import xyz.neonetwork.neolib.textures.NeoTexture;
 import xyz.neonetwork.neolib.utilities.NeoNotify;
 

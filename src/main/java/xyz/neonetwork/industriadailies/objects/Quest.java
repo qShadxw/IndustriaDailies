@@ -1,9 +1,9 @@
-package uk.co.tmdavies.industriadailies.objects;
+package xyz.neonetwork.industriadailies.objects;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import uk.co.tmdavies.industriadailies.IndustriaDailies;
-import uk.co.tmdavies.industriadailies.utils.Utils;
+import xyz.neonetwork.industriadailies.IndustriaDailies;
+import xyz.neonetwork.industriadailies.utils.Utils;
 
 import java.util.Objects;
 

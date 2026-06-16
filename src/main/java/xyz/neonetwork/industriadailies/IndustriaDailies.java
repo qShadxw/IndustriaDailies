@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies;
+package xyz.neonetwork.industriadailies;
 
 import com.mojang.logging.LogUtils;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
@@ -21,14 +21,14 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import org.slf4j.Logger;
-import uk.co.tmdavies.industriadailies.commands.MainCommand;
-import uk.co.tmdavies.industriadailies.commands.PlayerCommand;
-import uk.co.tmdavies.industriadailies.files.ConfigFile;
-import uk.co.tmdavies.industriadailies.objects.DefinedPositions;
-import uk.co.tmdavies.industriadailies.objects.Manager;
-import uk.co.tmdavies.industriadailies.objects.NeoNetworkIRS;
-import uk.co.tmdavies.industriadailies.objects.Quest;
-import uk.co.tmdavies.industriadailies.utils.Utils;
+import xyz.neonetwork.industriadailies.commands.MainCommand;
+import xyz.neonetwork.industriadailies.commands.PlayerCommand;
+import xyz.neonetwork.industriadailies.files.ConfigFile;
+import xyz.neonetwork.industriadailies.objects.DefinedPositions;
+import xyz.neonetwork.industriadailies.objects.Manager;
+import xyz.neonetwork.industriadailies.objects.NeoNetworkIRS;
+import xyz.neonetwork.industriadailies.objects.Quest;
+import xyz.neonetwork.industriadailies.utils.Utils;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package uk.co.tmdavies.industriadailies.objects;
+package xyz.neonetwork.industriadailies.objects;
 
 import net.minecraft.world.entity.player.Player;
-import uk.co.tmdavies.industriadailies.IndustriaDailies;
+import xyz.neonetwork.industriadailies.IndustriaDailies;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

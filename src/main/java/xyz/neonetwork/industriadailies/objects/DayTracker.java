@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.objects;
+package xyz.neonetwork.industriadailies.objects;
 
 import java.util.ArrayList;
 import java.util.UUID;

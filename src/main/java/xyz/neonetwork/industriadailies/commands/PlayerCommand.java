@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.commands;
+package xyz.neonetwork.industriadailies.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.player.Player;
-import uk.co.tmdavies.industriadailies.uis.ChestUIController;
+import xyz.neonetwork.industriadailies.uis.ChestUIController;
 
 public class PlayerCommand {
     public static String commandName = "quests";

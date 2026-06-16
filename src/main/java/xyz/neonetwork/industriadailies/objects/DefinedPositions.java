@@ -1,8 +1,8 @@
-package uk.co.tmdavies.industriadailies.objects;
+package xyz.neonetwork.industriadailies.objects;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.phys.Vec3;
-import uk.co.tmdavies.industriadailies.savedata.TargetDataStorage;
+import xyz.neonetwork.industriadailies.savedata.TargetDataStorage;
 
 import java.util.ArrayList;
 

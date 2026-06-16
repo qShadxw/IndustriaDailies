@@ -1,4 +1,4 @@
-package uk.co.tmdavies.industriadailies.savedata;
+package xyz.neonetwork.industriadailies.savedata;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
