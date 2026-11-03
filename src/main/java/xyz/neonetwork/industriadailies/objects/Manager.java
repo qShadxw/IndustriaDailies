@@ -8,6 +8,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.Objective;
@@ -64,20 +65,19 @@ public class Manager {
             return false;
         }
 
-        if (player.getInventory().contains(quest.getItemNeededAsItemstack())) {
-            if (player.getInventory().getItem(player.getInventory().findSlotMatchingItem(quest.getItemNeededAsItemstack())).getCount() >= quest.getAmountNeeded()) {
-                quest.setCompleted(true);
-                player.getInventory().removeItem(player.getInventory().findSlotMatchingItem(quest.getItemNeededAsItemstack()), quest.getAmountNeeded());
-            } else {
-                return false;
-            }
-        } else {
+        boolean requiresTalkTo = quest.getTalkTo() != null && !quest.getTalkTo().isEmpty();
+
+        if (requiresTalkTo && !quest.hasTalkedTo) {
             return false;
         }
 
-        if (((quest.getTalkTo() != null) && !quest.getTalkTo().isEmpty()) && !quest.hasTalkedTo) {
+        boolean itemsTaken = takeItems(player, quest.getItemNeededAsItemstack(), quest.getAmountNeeded());
+
+        if (!itemsTaken) {
             return false;
         }
+
+        quest.setCompleted(true);
 
         this.setSetQuestAsCompleted(player, quest.getId());
 
@@ -568,29 +568,9 @@ public class Manager {
             return;
         }
 
-        if (player.getInventory().contains(this.rerollItem)) {
-            ItemStack playerRerollItem = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(this.rerollItem));
+        boolean costPaid = takeItems(player, this.rerollItem, this.rerollItem.getCount());
 
-            if (playerRerollItem.getCount() >= this.rerollItem.getCount()) {
-                playerRerollItem.setCount(playerRerollItem.getCount()-this.rerollItem.getCount());
-            } else {
-                if (player instanceof ServerPlayer serverPlayer) {
-                    NeoNotify.sendToast(
-                            serverPlayer,
-                            Component.literal("Invalid Reroll Cost").withStyle(ChatFormatting.RED),
-                            Component.literal(String.format("You need %sx %s.", this.rerollItem.getCount(), Utils.getItemStackName(this.rerollItem))),
-                            NeoTexture.GENERIC
-                    );
-                } else {
-                    NeoNotify.sendTitle(
-                            Component.literal("Invalid Reroll Cost").withStyle(ChatFormatting.RED),
-                            Component.literal(String.format("You need %sx %s.", this.rerollItem.getCount(), Utils.getItemStackName(this.rerollItem)))
-                    );
-                }
-
-                return;
-            }
-        } else {
+        if (!costPaid) {
             if (player instanceof ServerPlayer serverPlayer) {
                 NeoNotify.sendToast(
                         serverPlayer,
@@ -637,6 +617,37 @@ public class Manager {
                     Component.literal("Rerolls left: " + rerolls)
             );
         }
+    }
+
+    public boolean takeItems(Player player, ItemStack neededItem, int amountNeeded) {
+        Inventory inventory = player.getInventory();
+        int totalFound = 0;
+
+        for (ItemStack inventoryStack : inventory.items) {
+            if (!inventoryStack.isEmpty() && ItemStack.isSameItemSameComponents(inventoryStack, neededItem)) {
+                totalFound += inventoryStack.getCount();
+            }
+        }
+
+        if (totalFound < amountNeeded) {
+            return false;
+        }
+
+        int amountRemaining = amountNeeded;
+
+        for (ItemStack inventoryStack : inventory.items) {
+            if (amountRemaining <= 0) {
+                break;
+            }
+
+            if (!inventoryStack.isEmpty() && ItemStack.isSameItemSameComponents(inventoryStack, neededItem)) {
+                int amountToTake = Math.min(inventoryStack.getCount(), amountRemaining);
+                inventoryStack.shrink(amountToTake);
+                amountRemaining -= amountToTake;
+            }
+        }
+
+        return true;
     }
 
     public void verboseManager() {

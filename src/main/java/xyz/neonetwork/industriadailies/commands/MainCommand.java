@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import xyz.neonetwork.industriadailies.IndustriaDailies;
 import xyz.neonetwork.industriadailies.objects.DayTracker;
@@ -205,19 +206,22 @@ public class MainCommand {
         List<Quest> playerQuests = IndustriaDailies.manager.getPersonalQuests(target);
         List<Quest> completedQuests = new ArrayList<>();
 
-        for (int i = 0; i < playerQuests.size(); i++) {
-            if (target.getInventory().contains(playerQuests.get(i).getItemNeededAsItemstack())) {
-                if (target.getInventory().getItem(target.getInventory().findSlotMatchingItem(playerQuests.get(i).getItemNeededAsItemstack())).getCount() >= playerQuests.get(i).getAmountNeeded()) {
-                    if (completedQuests.contains(playerQuests.get(i)) || playerQuests.get(i).isCompleted()) {
-                        continue;
-                    } else {
-                        completedQuests.add(playerQuests.get(i));
-                        playerQuests.get(i).setCompleted(true);
-                        target.getInventory().removeItem(target.getInventory().findSlotMatchingItem(playerQuests.get(i).getItemNeededAsItemstack()), playerQuests.get(i).getAmountNeeded());
-                    }
-                }
+        playerQuests.forEach(quest -> {
+            if (quest.isCompleted() || completedQuests.contains(quest)) {
+                return;
             }
-        }
+
+            boolean itemsTaken = IndustriaDailies.manager.takeItems(
+                    target,
+                    quest.getItemNeededAsItemstack(),
+                    quest.getAmountNeeded()
+            );
+
+            if (itemsTaken) {
+                completedQuests.add(quest);
+                quest.setCompleted(true);
+            }
+        });
 
         completedQuests.forEach(quest -> {
             IndustriaDailies.manager.setQuestAsCompleted(target, quest.getId());
